@@ -3,6 +3,8 @@
 
 Two implementations are provided, `/CSharp` implemented in .NET 7 C#, and `/Rust` in Rust 1.70 (June 2023). Both have almost identical behaviour, but the Rust one is probably faster and the CSharp one has a couple of extra features. Use `-h` for information.
 
+Both were developed on Windows, but should work on Linux and Mac.
+
 ## Building
 
 Build the C# version use `dotnet build FolderCompare.csproj` (Or Visual Studio 2022, which is free)
