@@ -36,7 +36,7 @@ fn main() -> anyhow::Result<()> {
     let path2: String = pargs.value_from_str(["-b", "--folderb"])?;
     let compstr: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
     let compareropt = parse_comparer(&compstr);
-    let firstonly = pargs.contains(["-f", "--first"]);
+    let firstonly = pargs.contains(["-f", "--first-only"]);
 
     if compareropt.is_err() {
         return Err(anyhow::anyhow!(

@@ -18,7 +18,7 @@ MANDATORY PARAMETERS:
 OPTIONS:
     -c, --comparison [value]     Comparison to use.
     -r, --raw                    Raw output, for piping
-    -f, --first                  Only show files in first folder
+    -f, --first-only             Only show files in folder A missing from folder B (default is both)
     
 Comparison can be:
     Name, NameSize or Hash. Default is Name.";
