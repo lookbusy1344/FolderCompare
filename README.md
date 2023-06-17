@@ -45,3 +45,9 @@ OPTIONS:
 ```
 
 Hashing uses SHA256 and is obviously much slower than just comparing on name and/or size.
+
+Implementing pluggable comparers (name / name & size / hash) is more difficult in Rust than in C#. C# allows different implementations of `IEqualityComparer<FileData>`.
+
+In Rust you have to use 'unit structs' to mark the different comparisons, and them implemented `Eq, PartialEq and Hash` traits on `FileData<..marker struct..>` for each comparison technique.
+
+An implementation of `HashSet` that took lambdas for hashing and comparison would be useful here!
