@@ -1,0 +1,76 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug with lldb params",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=folder_compare",
+                    "--package=folder_compare"
+                ],
+                "filter": {
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "-a",
+                "c:/users/johnt/documents/junk/1",
+                "-b",
+                "c:/users/johnt/documents/junk/2",
+                "-c",
+                "hash"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug with lldb",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=folder_compare",
+                    "--package=folder_compare"
+                ],
+                "filter": {
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "externalTerminal"
+        },
+        {
+            "name": "Debug with cppvsdbg",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/target/debug/folder_compare.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=folder_compare",
+                    "--package=folder_compare"
+                ],
+                "filter": {
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
