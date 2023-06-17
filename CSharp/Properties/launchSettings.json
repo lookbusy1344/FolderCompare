@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "FolderCompare": {
+      "commandName": "Project",
+      "commandLineArgs": "-a \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\1\" -b \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\2\""
+    },
+    "By Hash": {
+      "commandName": "Project",
+      "commandLineArgs": "-a \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\1\" -b \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\2\" --comparison hash"
+    },
+    "By NameSize": {
+      "commandName": "Project",
+      "commandLineArgs": "-a \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\1\" -b \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\2\" --comparison namesize"
+    }
+  }
+}
