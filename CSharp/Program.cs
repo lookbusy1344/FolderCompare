@@ -18,20 +18,7 @@ internal class Program
 				});
 
 			if (parsed.Tag == ParserResultType.NotParsed)
-			{
-				//var info = GitVersion.VersionInfo.Get();
-
-				//Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
-				//Console.WriteLine("Recursively compare two folders.");
-				//Console.WriteLine();
-				//Console.WriteLine("Mandatory parameters:");
-				//Console.WriteLine("  --foldera <name>, -a <name>          First folder");
-				//Console.WriteLine("  --folderb <name>, -b <name>          Second folder");
-				//Console.WriteLine();
-				//Console.WriteLine("Optional parameters:");
-				//Console.WriteLine("  --comparison <type>, -c <type>       How to compare (name, namesize, hash). Default is name");
 				return;
-			}
 
 			var info = GitVersion.VersionInfo.Get();
 			if (!parsed.Value.Raw)

@@ -1,5 +1,3 @@
-// this file exists purely to get 'touched' when a commit is made, triggering a compile on any dependent projs
-
 using System.Reflection;
 
 namespace GitVersion;
