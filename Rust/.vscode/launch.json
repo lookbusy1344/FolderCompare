@@ -17,9 +17,9 @@
             },
             "args": [
                 "-a",
-                "c:/users/johnt/documents/junk/1",
+                "C:/dev/Rust/FolderCompare/Testing/foldera",
                 "-b",
-                "c:/users/johnt/documents/junk/2",
+                "C:/dev/Rust/FolderCompare/Testing/folderb",
                 "-c",
                 "hash"
             ],

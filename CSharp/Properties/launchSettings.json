@@ -1,16 +1,16 @@
 {
   "profiles": {
-    "FolderCompare": {
-      "commandName": "Project",
-      "commandLineArgs": "-a \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\1\" -b \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\2\""
-    },
     "By Hash": {
       "commandName": "Project",
-      "commandLineArgs": "-a \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\1\" -b \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\2\" --comparison hash"
+      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c hash"
     },
     "By NameSize": {
       "commandName": "Project",
-      "commandLineArgs": "-a \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\1\" -b \"C:\\\\Users\\\\JohnT\\\\Documents\\\\junk\\\\2\" --comparison namesize"
+      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c namesize"
+    },
+    "By Name": {
+      "commandName": "Project",
+      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c name"
     }
   }
 }
