@@ -57,6 +57,9 @@ impl UniqueTrait for UniqueName {}
 impl UniqueTrait for UniqueNameSize {}
 impl UniqueTrait for UniqueHash {}
 
+unsafe impl<U> Send for FileData<U> where U: UniqueTrait {}
+unsafe impl<U> Sync for FileData<U> where U: UniqueTrait {}
+
 // =================================================================================================
 
 /// Name is unique

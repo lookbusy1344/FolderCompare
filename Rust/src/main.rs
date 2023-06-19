@@ -93,8 +93,16 @@ where
     U: UniqueTrait,         // U must be a Unique key marker
 {
     // scan the folders and populate the HashSets
-    let files1 = scan_folder::<U>(folder1, comparer)?;
-    let files2 = scan_folder::<U>(folder2, comparer)?;
+    //let files1 = scan_folder::<U>(folder1, comparer)?;
+    //let files2 = scan_folder::<U>(folder2, comparer)?;
+
+    let (files1, files2) = rayon::join(
+        || scan_folder::<U>(folder1, comparer),
+        || scan_folder::<U>(folder2, comparer),
+    );
+
+    let files1 = files1?;
+    let files2 = files2?;
 
     // find whats in files1, but not in files2
     let diff1: Vec<_> = files1.difference(&files2).collect();
