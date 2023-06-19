@@ -37,6 +37,7 @@ fn main() -> anyhow::Result<()> {
     let compstr: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
     let compareropt = parse_comparer(&compstr);
     let firstonly = pargs.contains(["-f", "--first-only"]);
+    let onethread = pargs.contains(["-o", "--one-thread"]);
 
     if compareropt.is_err() {
         return Err(anyhow::anyhow!(
@@ -67,13 +68,15 @@ fn main() -> anyhow::Result<()> {
     // this is a bit ugly but HashSet doesnt have pluggable comparers
     match comparer {
         FileDataCompareOption::Name => {
-            scan_and_check::<UniqueName>(&folder1, &folder2, comparer, raw, firstonly)?;
+            scan_and_check::<UniqueName>(&folder1, &folder2, comparer, raw, firstonly, onethread)?;
         }
         FileDataCompareOption::NameSize => {
-            scan_and_check::<UniqueNameSize>(&folder1, &folder2, comparer, raw, firstonly)?;
+            scan_and_check::<UniqueNameSize>(
+                &folder1, &folder2, comparer, raw, firstonly, onethread,
+            )?;
         }
         FileDataCompareOption::Hash => {
-            scan_and_check::<UniqueHash>(&folder1, &folder2, comparer, raw, firstonly)?;
+            scan_and_check::<UniqueHash>(&folder1, &folder2, comparer, raw, firstonly, onethread)?;
         }
     }
 
@@ -87,22 +90,29 @@ fn scan_and_check<U>(
     comparer: FileDataCompareOption,
     raw: bool,
     firstonly: bool,
+    onethread: bool,
 ) -> anyhow::Result<()>
 where
     FileData<U>: Eq + Hash, // FileData<U> must be properly comparable
     U: UniqueTrait,         // U must be a Unique key marker
 {
     // scan the folders and populate the HashSets
-    //let files1 = scan_folder::<U>(folder1, comparer)?;
-    //let files2 = scan_folder::<U>(folder2, comparer)?;
+    let files1;
+    let files2;
+    if onethread {
+        // scan the two folders in series, using one thread
+        files1 = scan_folder::<U>(folder1, comparer)?;
+        files2 = scan_folder::<U>(folder2, comparer)?;
+    } else {
+        // scan them in parallel
+        let (resfiles1, resfiles2) = rayon::join(
+            || scan_folder::<U>(folder1, comparer),
+            || scan_folder::<U>(folder2, comparer),
+        );
 
-    let (files1, files2) = rayon::join(
-        || scan_folder::<U>(folder1, comparer),
-        || scan_folder::<U>(folder2, comparer),
-    );
-
-    let files1 = files1?;
-    let files2 = files2?;
+        files1 = resfiles1?;
+        files2 = resfiles2?;
+    }
 
     // find whats in files1, but not in files2
     let diff1: Vec<_> = files1.difference(&files2).collect();

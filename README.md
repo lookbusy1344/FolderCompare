@@ -41,6 +41,7 @@ OPTIONS:
     -c, --comparison [value]     Comparison to use (Name, NameSize or Hash). Default is Name
     -r, --raw                    Raw output, for piping
     -f, --first-only             Only show files in folder A missing from folder B (default is both)
+    -o, --one-thread             Only use one thread (don't scan the two folders in parallel)
     -h, --help                   Help
 ```
 

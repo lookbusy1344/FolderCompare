@@ -18,6 +18,7 @@ MANDATORY PARAMETERS:
 OPTIONS:
     -c, --comparison [value]     Comparison to use.
     -r, --raw                    Raw output, for piping
+    -o, --one-thread             Only use one thread, don't scan folders in parallel
     -f, --first-only             Only show files in folder A missing from folder B (default is both)
     
 Comparison can be:
