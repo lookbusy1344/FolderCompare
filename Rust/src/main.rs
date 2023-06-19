@@ -45,38 +45,40 @@ fn main() -> anyhow::Result<()> {
         ));
     }
 
-    // these give "\\?\C:\Users\JohnT\Documents\junk\2", not ideal
-    let folder1 = Path::new(&path1).canonicalize()?;
-    let folder2 = Path::new(&path2).canonicalize()?;
-    let comparer = compareropt.unwrap();
+    let config = Config {
+        folder1: Path::new(&path1).canonicalize()?,
+        folder2: Path::new(&path2).canonicalize()?,
+        comparer: compareropt.unwrap(),
+        raw,
+        firstonly,
+        onethread,
+    };
 
-    if folder1 == folder2 {
+    if config.folder1 == config.folder2 {
         return Err(anyhow::anyhow!("Folders should not be the same"));
     }
 
     if !raw {
         println!(
             "Comparing folders '{}' and '{}', comparing by {:?}",
-            folder1.display(),
-            folder2.display(),
-            comparer
+            config.folder1.display(),
+            config.folder2.display(),
+            config.comparer
         );
         println!();
     }
 
     // call the appropriate comparison function
     // this is a bit ugly but HashSet doesnt have pluggable comparers
-    match comparer {
+    match config.comparer {
         FileDataCompareOption::Name => {
-            scan_and_check::<UniqueName>(&folder1, &folder2, comparer, raw, firstonly, onethread)?;
+            scan_and_check::<UniqueName>(&config)?;
         }
         FileDataCompareOption::NameSize => {
-            scan_and_check::<UniqueNameSize>(
-                &folder1, &folder2, comparer, raw, firstonly, onethread,
-            )?;
+            scan_and_check::<UniqueNameSize>(&config)?;
         }
         FileDataCompareOption::Hash => {
-            scan_and_check::<UniqueHash>(&folder1, &folder2, comparer, raw, firstonly, onethread)?;
+            scan_and_check::<UniqueHash>(&config)?;
         }
     }
 
@@ -84,14 +86,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 /// Wrapper around main scanning and comparison. Only needed because this is generic over the comparison type U
-fn scan_and_check<U>(
-    folder1: &Path,
-    folder2: &Path,
-    comparer: FileDataCompareOption,
-    raw: bool,
-    firstonly: bool,
-    onethread: bool,
-) -> anyhow::Result<()>
+fn scan_and_check<U>(config: &Config) -> anyhow::Result<()>
 where
     FileData<U>: Eq + Hash, // FileData<U> must be properly comparable
     U: UniqueTrait,         // U must be a Unique key marker
@@ -99,15 +94,15 @@ where
     // scan the folders and populate the HashSets
     let files1;
     let files2;
-    if onethread {
+    if config.onethread {
         // scan the two folders in series, using one thread
-        files1 = scan_folder::<U>(folder1, comparer)?;
-        files2 = scan_folder::<U>(folder2, comparer)?;
+        files1 = scan_folder::<U>(&config.folder1, config.comparer)?;
+        files2 = scan_folder::<U>(&config.folder2, config.comparer)?;
     } else {
         // scan them in parallel
         let (resfiles1, resfiles2) = rayon::join(
-            || scan_folder::<U>(folder1, comparer),
-            || scan_folder::<U>(folder2, comparer),
+            || scan_folder::<U>(&config.folder1, config.comparer),
+            || scan_folder::<U>(&config.folder2, config.comparer),
         );
 
         files1 = resfiles1?;
@@ -116,21 +111,21 @@ where
 
     // find whats in files1, but not in files2
     let diff1: Vec<_> = files1.difference(&files2).collect();
-    show_results(&diff1, folder1, folder2, raw);
+    show_results(&diff1, &config.folder1, &config.folder2, config.raw);
 
-    let count = if firstonly {
+    let count = if config.firstonly {
         // we dont care about the second stage, just yield the first count
         diff1.len()
     } else {
         // find whats in files2, but not in files1
         let diff2: Vec<_> = files2.difference(&files1).collect();
-        show_results(&diff2, folder2, folder1, raw);
+        show_results(&diff2, &config.folder2, &config.folder1, config.raw);
 
         // yield both counts
         diff1.len() + diff2.len()
     };
 
-    if !raw {
+    if !config.raw {
         println!("There are {count} differences");
     }
 

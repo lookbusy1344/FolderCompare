@@ -3,6 +3,9 @@ use git_version::git_version;
 use sha2::Digest;
 use std::fs::File;
 use std::io::{BufReader, Read};
+use std::path::PathBuf;
+
+use crate::filedata::FileDataCompareOption;
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!();
@@ -25,6 +28,16 @@ Comparison can be:
     Name, NameSize or Hash. Default is Name.";
 
 const BUFFER_SIZE: usize = 4096;
+
+/// Configuration for the program, wrapper around various options
+pub struct Config {
+    pub folder1: PathBuf,
+    pub folder2: PathBuf,
+    pub comparer: FileDataCompareOption,
+    pub raw: bool,
+    pub firstonly: bool,
+    pub onethread: bool,
+}
 
 /// Hash a file using the given hasher as a Digest implementation
 /// Returns base64 encoded hash
