@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FolderCompare;
+﻿namespace FolderCompare;
 
 /// <summary>
 /// Record holding information about a file
@@ -26,13 +20,15 @@ public class FileDataNameSizeComparer : IEqualityComparer<FileData>
 		return x.Name == y.Name && x.Size == y.Size;
 	}
 
-	public int GetHashCode(FileData obj)
-	{
+	public int GetHashCode(FileData obj) =>
 		// Generate a hash code based on the Name and Size of the file data object
-		return obj.Name.GetHashCode() ^ obj.Size.GetHashCode();
-	}
+		// or use a tuple:		(obj.Name, obj.Size).GetHashCode();
+		obj.Name.GetHashCode() ^ obj.Size.GetHashCode();
 }
 
+/// <summary>
+/// Compare two FileData objects based on filename only
+/// </summary>
 public class FileDataNameComparer : IEqualityComparer<FileData>
 {
 	public bool Equals(FileData? x, FileData? y)
@@ -45,10 +41,7 @@ public class FileDataNameComparer : IEqualityComparer<FileData>
 		return x.Name == y.Name;
 	}
 
-	public int GetHashCode(FileData obj)
-	{
-		return obj.Name.GetHashCode();
-	}
+	public int GetHashCode(FileData obj) => obj.Name.GetHashCode();
 }
 
 /// <summary>
@@ -66,9 +59,7 @@ public class FileDataHashComparer : IEqualityComparer<FileData>
 		return x.Hash == y.Hash && x.Size == y.Size;
 	}
 
-	public int GetHashCode(FileData obj)
-	{
+	public int GetHashCode(FileData obj) =>
 		// Generate a hash code based on the Name and Size of the file data object
-		return obj.Hash.GetHashCode() ^ obj.Size.GetHashCode();
-	}
+		obj.Hash.GetHashCode();
 }
