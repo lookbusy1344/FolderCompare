@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace FolderCompare;
@@ -42,16 +41,16 @@ internal class Program
 			{
 				if (!parsed.Value.Raw)
 					Console.WriteLine($"Scanning {path1}...");
-				files1 = ScanFolder(parsed.Value.FolderA!, comparer1);
+				files1 = ScanFolder(parsed.Value.FolderA!, !parsed.Value.Raw, comparer1);
 				if (!parsed.Value.Raw)
 					Console.WriteLine($"Scanning {path2}...");
-				files2 = ScanFolder(parsed.Value.FolderB!, comparer2);
+				files2 = ScanFolder(parsed.Value.FolderB!, !parsed.Value.Raw, comparer2);
 			}
 			else
 			{
 				// scan both folders in parallel
-				var task1 = Task.Run(() => ScanFolder(parsed.Value.FolderA!, comparer1));
-				var task2 = Task.Run(() => ScanFolder(parsed.Value.FolderB!, comparer2));
+				var task1 = Task.Run(() => ScanFolder(parsed.Value.FolderA!, false, comparer1));
+				var task2 = Task.Run(() => ScanFolder(parsed.Value.FolderB!, false, comparer2));
 				Task.WaitAll(task1, task2);
 
 				if (task1.IsFaulted) throw task1.Exception!;
@@ -115,7 +114,7 @@ internal class Program
 	/// <summary>
 	/// Scan a folder recursively and return a set of FileData objects
 	/// </summary>
-	static private HashSet<FileData> ScanFolder(DirectoryInfo dir, IEqualityComparer<FileData> comparer)
+	static private HashSet<FileData> ScanFolder(DirectoryInfo dir, bool flagduplicates, IEqualityComparer<FileData> comparer)
 	{
 		var path = dir.FullName;
 		var usehash = comparer is FileDataHashComparer;
@@ -135,7 +134,7 @@ internal class Program
 
 				var data = new FileData(name, filePath, size, hash);
 				var added = fileset.Add(data);
-				if (!added)
+				if (flagduplicates && !added)
 					Console.Error.WriteLine($"Duplicate file found: {data.Name}");
 			}
 			catch (Exception ex)
@@ -147,6 +146,9 @@ internal class Program
 		return fileset;
 	}
 
+	/// <summary>
+	/// Compute the SHA256 hash of a file, base64 encoded
+	/// </summary>
 	static private string ComputeHash(string file)
 	{
 		using var stream = File.OpenRead(file);
