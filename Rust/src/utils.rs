@@ -33,10 +33,10 @@ const BUFFER_SIZE: usize = 4096;
 pub struct Config {
     pub folder1: PathBuf,
     pub folder2: PathBuf,
-    pub comparer: FileDataCompareOption,
-    pub raw: bool,
-    pub firstonly: bool,
-    pub onethread: bool,
+    pub comparer: FileDataCompareOption, // how to compare files, Name, NameSize or Hash
+    pub raw: bool,                       // raw output, for piping
+    pub firstonly: bool, // only show files in folder A missing from folder B (default is both)
+    pub onethread: bool, // only use one thread, don't scan folders in parallel
 }
 
 /// Hash a file using the given hasher as a Digest implementation

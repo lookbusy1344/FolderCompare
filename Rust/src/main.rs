@@ -36,8 +36,6 @@ fn main() -> anyhow::Result<()> {
     let path2: String = pargs.value_from_str(["-b", "--folderb"])?;
     let compstr: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
     let compareropt = parse_comparer(&compstr);
-    let firstonly = pargs.contains(["-f", "--first-only"]);
-    let onethread = pargs.contains(["-o", "--one-thread"]);
 
     if compareropt.is_err() {
         return Err(anyhow::anyhow!(
@@ -45,22 +43,24 @@ fn main() -> anyhow::Result<()> {
         ));
     }
 
+    // package the config options, so they can be easily passed around
     let config = Config {
         folder1: Path::new(&path1).canonicalize()?,
         folder2: Path::new(&path2).canonicalize()?,
         comparer: compareropt.unwrap(),
         raw,
-        firstonly,
-        onethread,
+        firstonly: pargs.contains(["-f", "--first-only"]),
+        onethread: pargs.contains(["-o", "--one-thread"]),
     };
 
+    // comparing a folder with itself is pointless
     if config.folder1 == config.folder2 {
         return Err(anyhow::anyhow!("Folders should not be the same"));
     }
 
-    if !raw {
+    if !config.raw {
         println!(
-            "Comparing folders '{}' and '{}', comparing by {:?}",
+            "Comparing folders '{}' and '{}'. Comparing by {:?}",
             config.folder1.display(),
             config.folder2.display(),
             config.comparer
@@ -113,6 +113,7 @@ where
     let diff1: Vec<_> = files1.difference(&files2).collect();
     show_results(&diff1, &config.folder1, &config.folder2, config.raw);
 
+    // count the differences
     let count = if config.firstonly {
         // we dont care about the second stage, just yield the first count
         diff1.len()
@@ -126,25 +127,30 @@ where
     };
 
     if !config.raw {
-        println!("There are {count} differences");
+        println!("{count} difference(s) found");
     }
 
     Ok(())
 }
 
 /// Show the results of the comparison
-fn show_results<U: UniqueTrait>(diff: &Vec<&FileData<U>>, dir1: &Path, dir2: &Path, raw: bool) {
+fn show_results<U: UniqueTrait>(
+    differences: &Vec<&FileData<U>>,
+    presentindir: &Path,
+    absentindir: &Path,
+    raw: bool,
+) {
     if !raw {
         println!(
             "Files in '{}' but not in '{}'",
-            dir1.display(),
-            dir2.display()
+            presentindir.display(),
+            absentindir.display()
         );
-        if diff.is_empty() {
+        if differences.is_empty() {
             println!("None");
         }
     }
-    for f in diff {
+    for f in differences {
         println!("{}", f.path);
     }
     if !raw {
