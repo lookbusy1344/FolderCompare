@@ -100,10 +100,19 @@ where
     let diff1: Vec<_> = files1.difference(&files2).collect();
     show_results(&diff1, folder1, folder2, raw);
 
+    let count;
     if !firstonly {
         // find whats in files2, but not in files1
         let diff2: Vec<_> = files2.difference(&files1).collect();
         show_results(&diff2, folder2, folder1, raw);
+
+        count = diff1.len() + diff2.len();
+    } else {
+        count = diff1.len();
+    }
+
+    if !raw {
+        println!("There are {count} differences");
     }
 
     Ok(())
