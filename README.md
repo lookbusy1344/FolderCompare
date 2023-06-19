@@ -7,7 +7,7 @@ Both were developed on Windows, but should work on Linux and Mac.
 
 ## Building
 
-Build the C# version use `dotnet build FolderCompare.csproj` (Or Visual Studio 2022, which is free)
+Build the C# version use `dotnet build -c Release` (Or Visual Studio 2022, which is free)
 
 Build the Rust version with `cargo build -r`
 
