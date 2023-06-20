@@ -19,6 +19,25 @@ pub fn parse_comparer(
     FileDataCompareOption::from_str(compstr.as_ref().unwrap())
 }
 
+// =================================================================================================
+
+// A struct to hold the hash value, without the overhead of a String
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+pub struct Sha2Value {
+    pub hash: [u8; 32],
+}
+
+impl Sha2Value {
+    /// Create a new `Sha2Value` from a u8 slice
+    pub fn new(slice: &[u8]) -> Self {
+        let mut hash = [0u8; 32];
+        hash.copy_from_slice(slice);
+        Sha2Value { hash }
+    }
+}
+
+// =================================================================================================
+
 /// Type of comparison to use
 #[derive(Debug, Copy, Clone, PartialEq, Eq, EnumString)]
 #[strum(ascii_case_insensitive)]
@@ -38,7 +57,7 @@ pub struct FileData<U> {
     pub filename: String,
     pub path: String,
     pub size: u64,
-    pub hash: Option<String>,
+    pub hash: Sha2Value,
     pub phantom: PhantomData<U>,
 }
 

@@ -1,11 +1,10 @@
-use base64::{engine::general_purpose, Engine as _};
 use git_version::git_version;
 use sha2::Digest;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
 
-use crate::filedata::FileDataCompareOption;
+use crate::filedata::{FileDataCompareOption, Sha2Value};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!();
@@ -40,10 +39,10 @@ pub struct Config {
 }
 
 /// Hash a file using the given hasher as a Digest implementation
-/// Returns base64 encoded hash
+/// Returns a `Sha2Value`, which is a wrapper around a [u8; 32]
 /// # Errors
 /// Will return an error if the file cannot be opened or read
-pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<String> {
+pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<Sha2Value> {
     let file = File::open(filename)?;
     let mut reader = BufReader::new(file);
     let mut buffer = [0u8; BUFFER_SIZE];
@@ -59,7 +58,21 @@ pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<String> {
 
     let h = hasher.finalize();
 
-    // originally used hex::encode(h), from the hex crate (base 16)
-    // this is base64 encoding, which is shorter and faster
-    Ok(general_purpose::STANDARD_NO_PAD.encode(h))
+    Ok(Sha2Value::new(&h))
+}
+
+/// Hash a string slice using the given hasher as a Digest implementation
+/// Returns a `Sha2Value`, which is a wrapper around a [u8; 32]
+/// # Errors
+/// Will return an error if the file cannot be opened or read
+pub fn hash_str<D: Digest>(text: &str) -> anyhow::Result<Sha2Value> {
+    if text.is_empty() {
+        return Ok(Sha2Value::default());
+    }
+
+    let mut hasher = D::new();
+    hasher.update(text);
+    let h = hasher.finalize();
+
+    Ok(Sha2Value::new(&h))
 }
