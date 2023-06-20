@@ -5,18 +5,6 @@
 /// </summary>
 public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 {
-	//public static Sha2Value Create(byte[] bytes)
-	//{
-	//	if (bytes.Length != 32)
-	//		throw new ArgumentException("The byte array must contain exactly 32 bytes.", nameof(bytes));
-
-	//	return new(
-	//		a: BitConverter.ToUInt64(bytes, 0),
-	//		b: BitConverter.ToUInt64(bytes, 8),
-	//		c: BitConverter.ToUInt64(bytes, 16),
-	//		d: BitConverter.ToUInt64(bytes, 24));
-	//}
-
 	/// <summary>
 	/// Create a Sha2Value from a byte span
 	/// </summary>
@@ -52,19 +40,6 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 /// </summary>
 public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 {
-	//public static Sha1Value Create(byte[] bytes)
-	//{
-	//	if (bytes.Length != 20)
-	//		throw new ArgumentException("The byte array must contain exactly 20 bytes.", nameof(bytes));
-
-	//	return new(
-	//		a: BitConverter.ToUInt32(bytes, 0),
-	//		b: BitConverter.ToUInt32(bytes, 4),
-	//		c: BitConverter.ToUInt32(bytes, 8),
-	//		d: BitConverter.ToUInt32(bytes, 12),
-	//		e: BitConverter.ToUInt32(bytes, 16));
-	//}
-
 	/// <summary>
 	/// Create a Sha1Value from a byte span
 	/// </summary>
@@ -87,11 +62,6 @@ public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 	public byte[] ToBytes()
 	{
 		var bytes = new byte[20];
-		//BitConverter.TryWriteBytes(bytes.AsSpan(), a);
-		//BitConverter.TryWriteBytes(bytes.AsSpan(sizeof(uint)), b);
-		//BitConverter.TryWriteBytes(bytes.AsSpan(2 * sizeof(uint)), c);
-		//BitConverter.TryWriteBytes(bytes.AsSpan(3 * sizeof(uint)), d);
-		//BitConverter.TryWriteBytes(bytes.AsSpan(4 * sizeof(uint)), e);
 		HashUtils.WriteBytes(bytes.AsSpan(), a);
 		HashUtils.WriteBytes(bytes.AsSpan(sizeof(uint)), b);
 		HashUtils.WriteBytes(bytes.AsSpan(2 * sizeof(uint)), c);
