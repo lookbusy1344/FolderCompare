@@ -5,6 +5,8 @@
 /// </summary>
 public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 {
+	public static readonly Sha2Value Empty = new(0, 0, 0, 0);
+
 	/// <summary>
 	/// Create a Sha2Value from a byte span
 	/// </summary>
@@ -40,6 +42,8 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 /// </summary>
 public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 {
+	public static readonly Sha1Value Empty = new(0, 0, 0, 0, 0);
+
 	/// <summary>
 	/// Create a Sha1Value from a byte span
 	/// </summary>

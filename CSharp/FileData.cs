@@ -3,7 +3,7 @@
 /// <summary>
 /// Record holding information about a file
 /// </summary>
-public record class FileData(string Name, string Path, long Size, string Hash);
+public record class FileData(string Name, string Path, long Size, Sha2Value Hash);
 
 /// <summary>
 /// Compare two FileData objects based on their Name and Size properties

@@ -130,7 +130,7 @@ internal class Program
 				var name = Path.GetFileName(file);
 				var filePath = Path.GetFullPath(file);
 				var size = usesize ? new FileInfo(file).Length : 0;
-				var hash = (usehash && size > 0) ? ComputeHash(file) : string.Empty;
+				var hash = (usehash && size > 0) ? ComputeHash(file) : Sha2Value.Empty;
 
 				var data = new FileData(name, filePath, size, hash);
 				var added = fileset.Add(data);
@@ -149,11 +149,19 @@ internal class Program
 	/// <summary>
 	/// Compute the SHA256 hash of a file, base64 encoded
 	/// </summary>
-	static private string ComputeHash(string file)
+	static private Sha2Value ComputeHash(string file)
 	{
 		using var stream = File.OpenRead(file);
 		using var sha = SHA256.Create();
 		var hash = sha.ComputeHash(stream);
-		return Convert.ToBase64String(hash);
+
+		//var t1 = Sha2Value.Create(hash);
+		//var arr1 = t1.ToBytes();
+		//var check1 = t1 == Sha2Value.Create(arr1);
+		//for (var i = 0; i < arr1.Length; ++i)
+		//	if (arr1[i] != hash[i])
+		//		throw new Exception("Hash mismatch");
+
+		return Sha2Value.Create(hash);
 	}
 }
