@@ -147,7 +147,7 @@ internal class Program
 	}
 
 	/// <summary>
-	/// Compute the SHA256 hash of a file, base64 encoded
+	/// Compute the SHA256 hash of a file
 	/// </summary>
 	static private Sha2Value ComputeHash(string file)
 	{
@@ -155,12 +155,14 @@ internal class Program
 		using var sha = SHA256.Create();
 		var hash = sha.ComputeHash(stream);
 
-		//var t1 = Sha2Value.Create(hash);
-		//var arr1 = t1.ToBytes();
-		//var check1 = t1 == Sha2Value.Create(arr1);
-		//for (var i = 0; i < arr1.Length; ++i)
-		//	if (arr1[i] != hash[i])
-		//		throw new Exception("Hash mismatch");
+		return Sha2Value.Create(hash);
+	}
+
+	// function to SHA256 hash a string
+	static private Sha2Value ComputeHashOfString(string text)
+	{
+		using var sha = SHA256.Create();
+		var hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text));
 
 		return Sha2Value.Create(hash);
 	}
