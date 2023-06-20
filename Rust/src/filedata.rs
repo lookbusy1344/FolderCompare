@@ -57,7 +57,7 @@ pub struct FileData<U> {
     pub filename: String,
     pub path: String,
     pub size: u64,
-    pub hash: Option<Sha2Value>,
+    pub hash: Sha2Value,
     pub phantom: PhantomData<U>,
 }
 

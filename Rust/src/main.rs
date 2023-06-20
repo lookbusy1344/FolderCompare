@@ -179,9 +179,9 @@ where
                 filename: fname,
                 size: fsize,
                 hash: if comparer == FileDataCompareOption::Hash {
-                    Some(hash_file::<sha2::Sha256>(fpath.as_str())?)
+                    hash_file::<sha2::Sha256>(fpath.as_str())?
                 } else {
-                    None
+                    Sha2Value::default()
                 },
                 path: fpath, // needs to come after hash because it consumes fpath
                 phantom: PhantomData,
