@@ -2,19 +2,15 @@
   "profiles": {
     "By Hash": {
       "commandName": "Project",
-      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c hash -o"
+      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c hash"
     },
     "By NameSize": {
       "commandName": "Project",
-      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c namesize -o"
+      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c namesize"
     },
     "By Name": {
       "commandName": "Project",
-      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c name -o"
-    },
-    "By NameHash": {
-      "commandName": "Project",
-      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c namehash -o"
+      "commandLineArgs": "-a \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\foldera\" -b \"C:\\\\dev\\\\Rust\\\\FolderCompare\\\\Testing\\\\folderb\" -c name"
     }
   }
 }
