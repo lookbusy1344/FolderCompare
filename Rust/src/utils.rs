@@ -70,9 +70,7 @@ pub fn hash_str<D: Digest>(text: &str) -> anyhow::Result<Sha2Value> {
         return Ok(Sha2Value::default());
     }
 
-    let mut hasher = D::new();
-    hasher.update(text);
-    let h = hasher.finalize();
+    let h = D::new().chain_update(text).finalize();
 
     Ok(Sha2Value::new(&h))
 }
