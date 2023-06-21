@@ -157,11 +157,31 @@ internal class Program
 	}
 
 	/// <summary>
+	/// Compute the SHA256 hash of a file, without heap allocations
+	/// </summary>
+	static private Sha2Value ComputeHashOfFile2(string file)
+	{
+		using var stream = File.OpenRead(file);
+		Span<byte> buffer = stackalloc byte[4096];
+		Span<byte> hash = stackalloc byte[32];
+
+		//while (stream.Read(MemoryMarshal.AsBytes(buffer)) is int bytesRead && bytesRead > 0)
+		while (stream.Read(buffer) is int bytesRead && bytesRead > 0)
+		{
+			if (!SHA256.TryHashData(buffer, hash, out _))
+				throw new Exception("Failed to compute hash");
+		}
+		return Sha2Value.Create(hash);
+	}
+
+	/// <summary>
 	/// Compute the SHA256 hash of a string
 	/// </summary>
 	static private Sha2Value ComputeHashOfString(string text)
 	{
-		var hash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text));
+		Span<byte> hash = stackalloc byte[32];
+		if (!SHA256.TryHashData(System.Text.Encoding.UTF8.GetBytes(text), hash, out _))
+			throw new Exception("Failed to compute hash");
 		return Sha2Value.Create(hash);
 	}
 }

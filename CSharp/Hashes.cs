@@ -16,7 +16,7 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 			throw new ArgumentException("The byte span must contain exactly 32 bytes.", nameof(bytes));
 
 		return new(
-			a: BitConverter.ToUInt64(bytes.Slice(0, 8)),
+			a: BitConverter.ToUInt64(bytes[..8]),
 			b: BitConverter.ToUInt64(bytes.Slice(8, 8)),
 			c: BitConverter.ToUInt64(bytes.Slice(16, 8)),
 			d: BitConverter.ToUInt64(bytes.Slice(24, 8)));
@@ -53,7 +53,7 @@ public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 			throw new ArgumentException("The byte array must contain exactly 20 bytes.", nameof(bytes));
 
 		return new(
-			a: BitConverter.ToUInt32(bytes.Slice(0, 4)),
+			a: BitConverter.ToUInt32(bytes[..4]),
 			b: BitConverter.ToUInt32(bytes.Slice(4, 4)),
 			c: BitConverter.ToUInt32(bytes.Slice(8, 4)),
 			d: BitConverter.ToUInt32(bytes.Slice(12, 4)),
