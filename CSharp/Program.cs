@@ -41,16 +41,16 @@ internal class Program
 			{
 				if (!parsed.Value.Raw)
 					Console.WriteLine($"Scanning {path1}...");
-				files1 = ScanFolder(parsed.Value.FolderA!, !parsed.Value.Raw, comparer1);
+				files1 = ScanFolder(parsed.Value.FolderA!, parsed.Value.Compare, !parsed.Value.Raw, comparer1);
 				if (!parsed.Value.Raw)
 					Console.WriteLine($"Scanning {path2}...");
-				files2 = ScanFolder(parsed.Value.FolderB!, !parsed.Value.Raw, comparer2);
+				files2 = ScanFolder(parsed.Value.FolderB!, parsed.Value.Compare, !parsed.Value.Raw, comparer2);
 			}
 			else
 			{
 				// scan both folders in parallel
-				var task1 = Task.Run(() => ScanFolder(parsed.Value.FolderA!, false, comparer1));
-				var task2 = Task.Run(() => ScanFolder(parsed.Value.FolderB!, false, comparer2));
+				var task1 = Task.Run(() => ScanFolder(parsed.Value.FolderA!, parsed.Value.Compare, false, comparer1));
+				var task2 = Task.Run(() => ScanFolder(parsed.Value.FolderB!, parsed.Value.Compare, false, comparer2));
 				Task.WaitAll(task1, task2);
 
 				if (task1.IsFaulted) throw task1.Exception!;
@@ -84,8 +84,10 @@ internal class Program
 	{
 		ComparisonType.namesize => new FileDataNameSizeComparer(),
 		ComparisonType.name => new FileDataNameComparer(),
+		// these both use the same comparer, but the source of the hash can vary between filename and file content
 		ComparisonType.hash => new FileDataHashComparer(),
-		_ => throw new NotImplementedException(),
+		ComparisonType.namehash => new FileDataHashComparer(),
+		_ => throw new Exception($"Unknown comparison type {t}"),
 	};
 
 	static private int CompareSets(HashSet<FileData> a, HashSet<FileData> b, string path1, string path2, IEqualityComparer<FileData> comparer, bool raw)
@@ -114,11 +116,12 @@ internal class Program
 	/// <summary>
 	/// Scan a folder recursively and return a set of FileData objects
 	/// </summary>
-	static private HashSet<FileData> ScanFolder(DirectoryInfo dir, bool flagduplicates, IEqualityComparer<FileData> comparer)
+	static private HashSet<FileData> ScanFolder(DirectoryInfo dir, ComparisonType type, bool flagduplicates, IEqualityComparer<FileData> comparer)
 	{
 		var path = dir.FullName;
-		var usehash = comparer is FileDataHashComparer;
-		var usesize = usehash || comparer is FileDataNameSizeComparer;
+		//var contenthash = type == ComparisonType.hash;
+		//var namehash = type == ComparisonType.namehash;
+		//var usesize = contenthash || comparer is FileDataNameSizeComparer;
 
 		var files = Directory.GetFiles(path, "*", new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true });
 		var fileset = new HashSet<FileData>(files.Length, comparer);
@@ -129,8 +132,15 @@ internal class Program
 			{
 				var name = Path.GetFileName(file);
 				var filePath = Path.GetFullPath(file);
-				var size = usesize ? new FileInfo(file).Length : 0;
-				var hash = (usehash && size > 0) ? ComputeHashOfFile(file) : Sha2Value.Empty;
+				var size = new FileInfo(file).Length;
+				
+				var hash = type switch
+				{
+					// build the hash from the file content, or from the file name
+					ComparisonType.namehash => ComputeHashOfString(name),
+					ComparisonType.hash => ComputeHashOfFile(file),
+					_ => Sha2Value.Empty,
+				};
 
 				var data = new FileData(name, filePath, size, hash);
 				var added = fileset.Add(data);

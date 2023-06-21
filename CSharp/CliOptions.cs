@@ -10,7 +10,9 @@ public enum ComparisonType
 	[Display(Name = "name")]
 	name,
 	[Display(Name = "hash")]
-	hash
+	hash,
+	[Display(Name = "namehash")]
+	namehash
 }
 
 public class CliOptions
@@ -21,7 +23,7 @@ public class CliOptions
 	[Option('b', "folderb", Required = true, HelpText = "Folder B to search", Default = null)]
 	public DirectoryInfo? FolderB { get; set; }
 
-	[Option('c', "comparison", Required = false, HelpText = "Comparison type: name, namesize, hash", Default = ComparisonType.name)]
+	[Option('c', "comparison", Required = false, HelpText = "Comparison type: name, namesize, hash, namehash", Default = ComparisonType.name)]
 	public ComparisonType Compare { get; set; }
 
 	[Option('o', "one-thread", Required = false, HelpText = "Only use one thread", Default = false)]
