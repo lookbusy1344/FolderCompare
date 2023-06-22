@@ -187,14 +187,15 @@ public static class HashBuilder
 	}
 
 	/// <summary>
-	/// Unfinished attempt to compute the SHA256 hash of a string, by processing the string in chunks without heap allocations
+	/// Compute the SHA256 hash of a string, by processing the string in chunks without heap allocations
+	/// This uses a smaller buffer than ComputeHashOfStringNoAlloc
 	/// </summary>
-	public static Sha2Value ComputeHashOfStringNoAllocUNFINISHED(string text)
+	public static Sha2Value ComputeHashOfStringNoAlloc2(string text)
 	{
-		const int bufferSize = 1024;
+		const int bufferSizeChars = 1024;
 
 		// buffer is 1024 chars, which is 1024-3072 bytes
-		Span<byte> buffer = stackalloc byte[bufferSize * 3];
+		Span<byte> buffer = stackalloc byte[bufferSizeChars * 3];
 		Span<byte> hash = stackalloc byte[32];
 
 		var charoffset = 0;
@@ -205,13 +206,13 @@ public static class HashBuilder
 			if (remainingChars <= 0) break;
 
 			// how many chars can we process into the buffer? (up to bufferSize)
-			var charsToCopy = Math.Min(bufferSize, remainingChars);
+			var charsToCopy = Math.Min(bufferSizeChars, remainingChars);
 
 			// make a slice of the chars
 			var textslice = text.AsSpan(charoffset, charsToCopy);
 
-			// convert the chars to bytes. This will be 1-3 bytes per char
-			var byteslastindex = ByteUtils.CharSpanToUtf8Span(textslice, ref buffer) - 1;
+			// convert the chars to bytes, and put them into buffer. This will be 1-3 bytes per char
+			var byteslastindex = Encoding.UTF8.GetBytes(textslice, buffer) - 1;
 
 			// buffer range is 0..byteslastindex, so hash that
 			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _))
@@ -249,28 +250,28 @@ public static class ByteUtils
 			(byte)(0x80 | (c & 0x3f)));
 	}
 
-	/// <summary>
-	/// Convert a span of chars into a span of UTF8 encoded bytes.
-	/// Resulting span must be pre-allocated to be at least input.Length * 3 bytes
-	/// </summary>
-	public static int CharSpanToUtf8Span(ReadOnlySpan<char> input, ref Span<byte> result)
-	{
-		// each char can be 1-3 bytes
-		if (result.Length < input.Length * 3)
-			throw new Exception("Output buffer is too small");
+	///// <summary>
+	///// Convert a span of chars into a span of UTF8 encoded bytes.
+	///// Resulting span must be pre-allocated to be at least input.Length * 3 bytes
+	///// </summary>
+	//public static int CharSpanToUtf8Span(ReadOnlySpan<char> input, ref Span<byte> result)
+	//{
+	//	// each char can be 1-3 bytes
+	//	if (result.Length < input.Length * 3)
+	//		throw new Exception("Output buffer is too small");
 
-		var p = 0;
-		for (var i = 0; i < input.Length; i++)
-		{
-			var (b1, b2, b3) = CharToUtf8(input[i]);
-			result[p++] = b1;
+	//	var p = 0;
+	//	for (var i = 0; i < input.Length; i++)
+	//	{
+	//		var (b1, b2, b3) = CharToUtf8(input[i]);
+	//		result[p++] = b1;
 
-			if (b2 != 0)
-				result[p++] = b2;
-			if (b3 != 0)
-				result[p++] = b3;
-		}
+	//		if (b2 != 0)
+	//			result[p++] = b2;
+	//		if (b3 != 0)
+	//			result[p++] = b3;
+	//	}
 
-		return p;
-	}
+	//	return p;
+	//}
 }
