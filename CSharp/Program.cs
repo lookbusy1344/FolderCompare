@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace FolderCompare;
 
@@ -147,7 +148,7 @@ internal class Program
 	}
 
 	/// <summary>
-	/// Compute the SHA256 hash of a file
+	/// Compute the SHA256 hash of a file. This uses heap allocation
 	/// </summary>
 	static private Sha2Value ComputeHashOfFile(string file)
 	{
@@ -159,7 +160,7 @@ internal class Program
 	/// <summary>
 	/// Compute the SHA256 hash of a file, without heap allocations
 	/// </summary>
-	static private Sha2Value ComputeHashOfFile2(string file)
+	static private Sha2Value ComputeHashOfFileNoAlloc(string file)
 	{
 		using var stream = File.OpenRead(file);
 		Span<byte> buffer = stackalloc byte[4096];
@@ -175,12 +176,34 @@ internal class Program
 	}
 
 	/// <summary>
-	/// Compute the SHA256 hash of a string
+	/// Compute the SHA256 hash of a string.
+	/// Converting string to bytes is a heap allocation
 	/// </summary>
 	static private Sha2Value ComputeHashOfString(string text)
 	{
 		Span<byte> hash = stackalloc byte[32];
-		if (!SHA256.TryHashData(System.Text.Encoding.UTF8.GetBytes(text), hash, out _))
+		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _))
+			throw new Exception("Failed to compute hash");
+		return Sha2Value.Create(hash);
+	}
+
+	/// <summary>
+	/// Compute the SHA256 hash of a string, without heap allocations
+	/// </summary>
+	static private Sha2Value ComputeHashOfStringNoAlloc(string text)
+	{
+		// convert string to bytes on the stack
+		int byteCount = Encoding.UTF8.GetByteCount(text);
+		if (byteCount > 4096)
+			return ComputeHashOfString(text);
+
+		Span<byte> buffer = stackalloc byte[byteCount];
+		if (Encoding.UTF8.GetBytes(text, buffer) != byteCount)
+			throw new Exception("Failed to convert string to bytes");
+
+		// now hash the bytes, again without heap allocations
+		Span<byte> hash = stackalloc byte[32];
+		if (!SHA256.TryHashData(buffer, hash, out _))
 			throw new Exception("Failed to compute hash");
 		return Sha2Value.Create(hash);
 	}
