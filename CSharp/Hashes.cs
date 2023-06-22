@@ -1,4 +1,7 @@
-﻿namespace FolderCompare;
+﻿using System.Security.Cryptography;
+using System.Text;
+
+namespace FolderCompare;
 
 /// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
@@ -34,6 +37,16 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 		HashUtils.WriteBytes(bytes.AsSpan(3 * sizeof(ulong)), d);
 
 		return bytes;
+	}
+
+	//public override string ToString() => BitConverter.ToString(ToBytes()).Replace("-", "");
+
+	public override string ToString()
+	{
+		var builder = new StringBuilder(64);
+		foreach (var b in ToBytes())
+			builder.AppendFormat("{0:x2}", b);
+		return builder.ToString();
 	}
 }
 
@@ -74,9 +87,19 @@ public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 
 		return bytes;
 	}
+
+	//public override string ToString() => BitConverter.ToString(ToBytes()).Replace("-", "");
+
+	public override string ToString()
+	{
+		var builder = new StringBuilder(40);
+		foreach (var b in ToBytes())
+			builder.AppendFormat("{0:x2}", b);
+		return builder.ToString();
+	}
 }
 
-public static class HashUtils
+internal static class HashUtils
 {
 	/// <summary>
 	/// Wrapper around TryWriteBytes that throws an exception if it fails, for uint
@@ -94,5 +117,72 @@ public static class HashUtils
 	{
 		if (!BitConverter.TryWriteBytes(destination, value))
 			throw new InvalidOperationException("Could not write bytes.");
+	}
+}
+
+/// <summary>
+/// Functions for computing hashes based on files and strings
+/// </summary>
+public static class HashBuilder
+{
+	/// <summary>
+	/// Compute the SHA256 hash of a file. This uses heap allocation
+	/// </summary>
+	public static Sha2Value ComputeHashOfFile(string file)
+	{
+		using var stream = File.OpenRead(file);
+		var hash = SHA256.HashData(stream);
+		return Sha2Value.Create(hash);
+	}
+
+	/// <summary>
+	/// Compute the SHA256 hash of a file, without heap allocations
+	/// </summary>
+	public static Sha2Value ComputeHashOfFileNoAlloc(string file)
+	{
+		using var stream = File.OpenRead(file);
+		Span<byte> buffer = stackalloc byte[4096];
+		Span<byte> hash = stackalloc byte[32];
+
+		//while (stream.Read(MemoryMarshal.AsBytes(buffer)) is int bytesRead && bytesRead > 0)
+		while (stream.Read(buffer) is int bytesRead && bytesRead > 0)
+		{
+			if (!SHA256.TryHashData(buffer, hash, out _))
+				throw new Exception("Failed to compute hash");
+		}
+		return Sha2Value.Create(hash);
+	}
+
+	/// <summary>
+	/// Compute the SHA256 hash of a string.
+	/// Converting string to bytes is a heap allocation
+	/// </summary>
+	public static Sha2Value ComputeHashOfString(string text)
+	{
+		Span<byte> hash = stackalloc byte[32];
+		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _))
+			throw new Exception("Failed to compute hash");
+		return Sha2Value.Create(hash);
+	}
+
+	/// <summary>
+	/// Compute the SHA256 hash of a string, without heap allocations
+	/// </summary>
+	public static Sha2Value ComputeHashOfStringNoAlloc(string text)
+	{
+		// convert string to bytes on the stack
+		int byteCount = Encoding.UTF8.GetByteCount(text);
+		if (byteCount > 4096)
+			return ComputeHashOfString(text);
+
+		Span<byte> buffer = stackalloc byte[byteCount];
+		if (Encoding.UTF8.GetBytes(text, buffer) != byteCount)
+			throw new Exception("Failed to convert string to bytes");
+
+		// now hash the bytes, again without heap allocations
+		Span<byte> hash = stackalloc byte[32];
+		if (!SHA256.TryHashData(buffer, hash, out _))
+			throw new Exception("Failed to compute hash");
+		return Sha2Value.Create(hash);
 	}
 }
