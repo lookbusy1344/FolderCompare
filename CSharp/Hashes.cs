@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 
 namespace FolderCompare;
@@ -172,7 +171,7 @@ public static class HashBuilder
 	public static Sha2Value ComputeHashOfStringNoAlloc(string text)
 	{
 		// convert string to bytes on the stack
-		int byteCount = Encoding.UTF8.GetByteCount(text);
+		var byteCount = Encoding.UTF8.GetByteCount(text);
 		if (byteCount > 4096)
 			return ComputeHashOfString(text);
 
@@ -188,42 +187,48 @@ public static class HashBuilder
 	}
 
 	/// <summary>
-	/// Unfinished attempt to compute the SHA256 hash of a string, by processing the string in chunks
+	/// Unfinished attempt to compute the SHA256 hash of a string, by processing the string in chunks without heap allocations
 	/// </summary>
 	public static Sha2Value ComputeHashOfStringNoAllocUNFINISHED(string text)
 	{
-		const int bufferSize = 4096;
-		int byteCount = Encoding.UTF8.GetByteCount(text);
+		const int bufferSize = 1024;
 
-		Span<byte> buffer = stackalloc byte[bufferSize];
+		// buffer is 1024 chars, which is 1024-3072 bytes
+		Span<byte> buffer = stackalloc byte[bufferSize * 3];
 		Span<byte> hash = stackalloc byte[32];
 
-		int offset = 0;
-		while (offset < byteCount)
+		var charoffset = 0;
+		while (true)
 		{
-			int remainingBytes = byteCount - offset;
-			int bytesToCopy = Math.Min(bufferSize, remainingBytes);
+			// find the total number of chars left to process
+			var remainingChars = text.Length - charoffset;
+			if (remainingChars <= 0) break;
 
-			// *** i think this is flawed. A span<char,10> might generate 10 bytes, or up to 30 bytes.
-			// so buffer needs to be x3 the size of the char span
-			if (Encoding.UTF8.GetBytes(text.AsSpan(offset, bytesToCopy), buffer) != bytesToCopy)
-				throw new Exception("Failed to convert string to bytes");
+			// how many chars can we process into the buffer? (up to bufferSize)
+			var charsToCopy = Math.Min(bufferSize, remainingChars);
 
-			if (!SHA256.TryHashData(buffer[..bytesToCopy], hash, out _))
+			// make a slice of the chars
+			var textslice = text.AsSpan(charoffset, charsToCopy);
+
+			// convert the chars to bytes. This will be 1-3 bytes per char
+			var byteslastindex = ByteUtils.CharSpanToUtf8Span(textslice, ref buffer) - 1;
+
+			// buffer range is 0..byteslastindex, so hash that
+			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _))
 				throw new Exception("Failed to compute hash");
 
-			offset += bytesToCopy;
+			// move the offset forward
+			charoffset += charsToCopy;
 		}
 
-		throw new NotImplementedException();
-		//return Sha2Value.Create(hash);
+		return Sha2Value.Create(hash);
 	}
 }
 
 public static class ByteUtils
 {
 	/// <summary>
-	/// High performance routine to turn UTF-16 char into UTF-8 bytes (1-3 bytes)
+	/// High performance routine to turn UTF-16 char into UTF-8 bytes (1-3 bytes in a tuple)
 	/// </summary>
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public static (byte, byte, byte) CharToUtf8(char c)
@@ -245,29 +250,19 @@ public static class ByteUtils
 	}
 
 	/// <summary>
-	/// Turn a string into a sequence of UTF-8 bytes, without heap allocations
+	/// Convert a span of chars into a span of UTF8 encoded bytes.
+	/// Resulting span must be pre-allocated to be at least input.Length * 3 bytes
 	/// </summary>
-	public static IEnumerable<byte> StringToUtf8(string s)
+	public static int CharSpanToUtf8Span(ReadOnlySpan<char> input, ref Span<byte> result)
 	{
-		foreach (var c in s)
-		{
-			var (b1, b2, b3) = CharToUtf8(c);
-			yield return b1;
+		// each char can be 1-3 bytes
+		if (result.Length < input.Length * 3)
+			throw new Exception("Output buffer is too small");
 
-			if (b2 != 0)
-				yield return b2;
-			if (b3 != 0)
-				yield return b3;
-		}
-	}
-
-	public static IEnumerable<byte> StringToUtf8(ReadOnlySpan<char> cspan)
-	{
-		Span<byte> result = stackalloc byte[cspan.Length * 3];
-		int p = 0;
-		for(int i = 0; i < cspan.Length; i++)
+		var p = 0;
+		for (var i = 0; i < input.Length; i++)
 		{
-			var (b1, b2, b3) = CharToUtf8(cspan[i]);
+			var (b1, b2, b3) = CharToUtf8(input[i]);
 			result[p++] = b1;
 
 			if (b2 != 0)
@@ -276,10 +271,6 @@ public static class ByteUtils
 				result[p++] = b3;
 		}
 
-		// *** maybe take a ref to an existing output buffer
-
-		throw new NotImplementedException();
-		//foreach (var b in result[..p])
-		//	yield return b;
+		return p;
 	}
 }
