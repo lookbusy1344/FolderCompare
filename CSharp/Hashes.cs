@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace FolderCompare;
@@ -184,5 +185,101 @@ public static class HashBuilder
 		if (!SHA256.TryHashData(buffer, hash, out _))
 			throw new Exception("Failed to compute hash");
 		return Sha2Value.Create(hash);
+	}
+
+	/// <summary>
+	/// Unfinished attempt to compute the SHA256 hash of a string, by processing the string in chunks
+	/// </summary>
+	public static Sha2Value ComputeHashOfStringNoAllocUNFINISHED(string text)
+	{
+		const int bufferSize = 4096;
+		int byteCount = Encoding.UTF8.GetByteCount(text);
+
+		Span<byte> buffer = stackalloc byte[bufferSize];
+		Span<byte> hash = stackalloc byte[32];
+
+		int offset = 0;
+		while (offset < byteCount)
+		{
+			int remainingBytes = byteCount - offset;
+			int bytesToCopy = Math.Min(bufferSize, remainingBytes);
+
+			// *** i think this is flawed. A span<char,10> might generate 10 bytes, or up to 30 bytes.
+			// so buffer needs to be x3 the size of the char span
+			if (Encoding.UTF8.GetBytes(text.AsSpan(offset, bytesToCopy), buffer) != bytesToCopy)
+				throw new Exception("Failed to convert string to bytes");
+
+			if (!SHA256.TryHashData(buffer[..bytesToCopy], hash, out _))
+				throw new Exception("Failed to compute hash");
+
+			offset += bytesToCopy;
+		}
+
+		throw new NotImplementedException();
+		//return Sha2Value.Create(hash);
+	}
+}
+
+public static class ByteUtils
+{
+	/// <summary>
+	/// High performance routine to turn UTF-16 char into UTF-8 bytes (1-3 bytes)
+	/// </summary>
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+	public static (byte, byte, byte) CharToUtf8(char c)
+	{
+		// a single utf-8 byte
+		if (c <= 0x7f)
+			return ((byte)c, 0, 0);
+
+		// two utf-8 bytes
+		if (c <= 0x7ff)
+			return ((byte)(0xc0 | (c >> 6)),
+				(byte)(0x80 | (c & 0x3f)),
+				0);
+
+		// three utf-8 bytes
+		return ((byte)(0xe0 | (c >> 12)),
+			(byte)(0x80 | ((c >> 6) & 0x3f)),
+			(byte)(0x80 | (c & 0x3f)));
+	}
+
+	/// <summary>
+	/// Turn a string into a sequence of UTF-8 bytes, without heap allocations
+	/// </summary>
+	public static IEnumerable<byte> StringToUtf8(string s)
+	{
+		foreach (var c in s)
+		{
+			var (b1, b2, b3) = CharToUtf8(c);
+			yield return b1;
+
+			if (b2 != 0)
+				yield return b2;
+			if (b3 != 0)
+				yield return b3;
+		}
+	}
+
+	public static IEnumerable<byte> StringToUtf8(ReadOnlySpan<char> cspan)
+	{
+		Span<byte> result = stackalloc byte[cspan.Length * 3];
+		int p = 0;
+		for(int i = 0; i < cspan.Length; i++)
+		{
+			var (b1, b2, b3) = CharToUtf8(cspan[i]);
+			result[p++] = b1;
+
+			if (b2 != 0)
+				result[p++] = b2;
+			if (b3 != 0)
+				result[p++] = b3;
+		}
+
+		// *** maybe take a ref to an existing output buffer
+
+		throw new NotImplementedException();
+		//foreach (var b in result[..p])
+		//	yield return b;
 	}
 }
