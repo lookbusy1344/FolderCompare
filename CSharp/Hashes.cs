@@ -212,7 +212,7 @@ public static class HashBuilder
 			var textslice = text.AsSpan(charoffset, charsToCopy);
 
 			// convert the chars to bytes, and put them into buffer. This will be 1-3 bytes per char
-			var byteslastindex = Encoding.UTF8.GetBytes(textslice, buffer) - 1;
+			var byteslastindex = Encoding.UTF8.GetBytes(textslice, buffer);
 
 			// buffer range is 0..byteslastindex, so hash that
 			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _))
