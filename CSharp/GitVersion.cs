@@ -31,7 +31,7 @@ public readonly struct VersionInfo
 	/// <summary>
 	/// An empty version info
 	/// </summary>
-	public static VersionInfo Empty = new() { Version = string.Empty, GitHash = string.Empty };
+	public static readonly VersionInfo Empty = new() { Version = string.Empty, GitHash = string.Empty };
 
 	public string GetHash(int? len = null)
 	{
@@ -41,7 +41,7 @@ public readonly struct VersionInfo
 		if (len == null)
 			return GitHash;
 		else
-			return $"{GitHash.Substring(0, len.Value)}{(GitModified ? "+" : string.Empty)}";
+			return $"{GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
 	}
 
 	public string GetVersionHash(int? len = null)
@@ -52,7 +52,7 @@ public readonly struct VersionInfo
 		if (len == null)
 			return $"v{Version} - {GitHash}";
 		else
-			return $"v{Version} - {GitHash.Substring(0, len.Value)}{(GitModified ? "+" : string.Empty)}";
+			return $"v{Version} - {GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
 	}
 
 	public static VersionInfo Get()
