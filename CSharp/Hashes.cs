@@ -39,13 +39,29 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 		return bytes;
 	}
 
-	//public override string ToString() => BitConverter.ToString(ToBytes()).Replace("-", "");
+	/// <summary>
+	/// Turn the Sha2Value into a byte array, without allocating a new array
+	/// </summary>
+	public void ToBytes(Span<byte> bytes)
+	{
+		//if (bytes.Length != 32)
+		//	throw new ArgumentException("The byte span must contain exactly 32 bytes.", nameof(bytes));
+
+		HashUtils.WriteBytes(bytes, a);
+		HashUtils.WriteBytes(bytes.Slice(sizeof(ulong)), b);
+		HashUtils.WriteBytes(bytes.Slice(2 * sizeof(ulong)), c);
+		HashUtils.WriteBytes(bytes.Slice(3 * sizeof(ulong)), d);
+	}
 
 	public override string ToString()
 	{
+		Span<byte> buff = stackalloc byte[32];
 		var builder = new StringBuilder(64);
-		foreach (var b in ToBytes())
+
+		ToBytes(buff);
+		foreach (var b in buff)
 			builder.AppendFormat("{0:x2}", b);
+
 		return builder.ToString();
 	}
 }
@@ -88,13 +104,30 @@ public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 		return bytes;
 	}
 
-	//public override string ToString() => BitConverter.ToString(ToBytes()).Replace("-", "");
+	/// <summary>
+	/// Turn the Sha1Value into a byte array, without allocating a new array
+	/// </summary>
+	public void ToBytes(Span<byte> bytes)
+	{
+		//if (bytes.Length != 20)
+		//	throw new ArgumentException("The byte span must contain exactly 20 bytes.", nameof(bytes));
+
+		HashUtils.WriteBytes(bytes, a);
+		HashUtils.WriteBytes(bytes.Slice(sizeof(uint)), b);
+		HashUtils.WriteBytes(bytes.Slice(2 * sizeof(uint)), c);
+		HashUtils.WriteBytes(bytes.Slice(3 * sizeof(uint)), d);
+		HashUtils.WriteBytes(bytes.Slice(4 * sizeof(uint)), e);
+	}
 
 	public override string ToString()
 	{
+		Span<byte> buff = stackalloc byte[20];
 		var builder = new StringBuilder(40);
-		foreach (var b in ToBytes())
+
+		ToBytes(buff);
+		foreach (var b in buff)
 			builder.AppendFormat("{0:x2}", b);
+
 		return builder.ToString();
 	}
 }
