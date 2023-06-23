@@ -48,9 +48,9 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 		//	throw new ArgumentException("The byte span must contain exactly 32 bytes.", nameof(bytes));
 
 		HashUtils.WriteBytes(bytes, a);
-		HashUtils.WriteBytes(bytes.Slice(sizeof(ulong)), b);
-		HashUtils.WriteBytes(bytes.Slice(2 * sizeof(ulong)), c);
-		HashUtils.WriteBytes(bytes.Slice(3 * sizeof(ulong)), d);
+		HashUtils.WriteBytes(bytes[sizeof(ulong)..], b);
+		HashUtils.WriteBytes(bytes[(2 * sizeof(ulong))..], c);
+		HashUtils.WriteBytes(bytes[(3 * sizeof(ulong))..], d);
 	}
 
 	public override string ToString()
@@ -113,10 +113,10 @@ public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 		//	throw new ArgumentException("The byte span must contain exactly 20 bytes.", nameof(bytes));
 
 		HashUtils.WriteBytes(bytes, a);
-		HashUtils.WriteBytes(bytes.Slice(sizeof(uint)), b);
-		HashUtils.WriteBytes(bytes.Slice(2 * sizeof(uint)), c);
-		HashUtils.WriteBytes(bytes.Slice(3 * sizeof(uint)), d);
-		HashUtils.WriteBytes(bytes.Slice(4 * sizeof(uint)), e);
+		HashUtils.WriteBytes(bytes[sizeof(uint)..], b);
+		HashUtils.WriteBytes(bytes[(2 * sizeof(uint))..], c);
+		HashUtils.WriteBytes(bytes[(3 * sizeof(uint))..], d);
+		HashUtils.WriteBytes(bytes[(4 * sizeof(uint))..], e);
 	}
 
 	public override string ToString()
