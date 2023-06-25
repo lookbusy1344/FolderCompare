@@ -79,7 +79,7 @@ internal class Program
 		}
 	}
 
-	static private IEqualityComparer<FileData> BuildComparer(ComparisonType t) => t switch
+	private static IEqualityComparer<FileData> BuildComparer(ComparisonType t) => t switch
 	{
 		ComparisonType.namesize => new FileDataNameSizeComparer(),
 		ComparisonType.name => new FileDataNameComparer(),
@@ -87,7 +87,7 @@ internal class Program
 		_ => throw new NotImplementedException(),
 	};
 
-	static private int CompareSets(HashSet<FileData> a, HashSet<FileData> b, string path1, string path2, IEqualityComparer<FileData> comparer, bool raw)
+	private static int CompareSets(HashSet<FileData> a, HashSet<FileData> b, string path1, string path2, IEqualityComparer<FileData> comparer, bool raw)
 	{
 		var difference = a
 			.Except(b, comparer)
@@ -113,7 +113,7 @@ internal class Program
 	/// <summary>
 	/// Scan a folder recursively and return a set of FileData objects
 	/// </summary>
-	static private HashSet<FileData> ScanFolder(DirectoryInfo dir, bool flagduplicates, IEqualityComparer<FileData> comparer)
+	private static HashSet<FileData> ScanFolder(DirectoryInfo dir, bool flagduplicates, IEqualityComparer<FileData> comparer)
 	{
 		var path = dir.FullName;
 		var usehash = comparer is FileDataHashComparer;
