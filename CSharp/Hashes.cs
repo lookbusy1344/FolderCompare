@@ -3,6 +3,8 @@ using System.Text;
 
 namespace FolderCompare;
 
+#pragma warning disable IDE1006 // Upper case first letter for public members
+
 /// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
 /// </summary>
@@ -60,7 +62,7 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 
 		ToBytes(buff);
 		foreach (var b in buff)
-			builder.AppendFormat("{0:x2}", b);
+			_ = builder.AppendFormat("{0:x2}", b);
 
 		return builder.ToString();
 	}
@@ -126,11 +128,13 @@ public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 
 		ToBytes(buff);
 		foreach (var b in buff)
-			builder.AppendFormat("{0:x2}", b);
+			_ = builder.AppendFormat("{0:x2}", b);
 
 		return builder.ToString();
 	}
 }
+
+#pragma warning restore IDE1006 // Upper case first letter for public members
 
 internal static class HashUtils
 {
