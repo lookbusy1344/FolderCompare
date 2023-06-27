@@ -7,7 +7,7 @@ Both were developed on Windows, but should work on Linux and Mac.
 
 ## Building
 
-Build the C# version use `dotnet build -c Release` (Or Visual Studio 2022, which is free)
+Build the C# version use `dotnet publish -c Release` (Or Visual Studio 2022, which is free)
 
 Build the Rust version with `cargo build -r`
 
@@ -65,3 +65,25 @@ Benchmarks from Hyperfine, run on a wheezy old laptop. Code from ver 0.9.1 (1ccb
 | Second run	    | 3054 | 3667 |      |		2408 |   3018  | |
 
 Hashing is obviously more expensive than comparison by filename. The parallel code is around 25% faster than single-threaded (a maximum of 2 threads are used, and only for the folder enumeration and hashing). The C# code performs suprisingly well for the hashing tests (20% slower than Rust). For file comparison it is 400% slower, but still only takes 0.28 seconds. There is probably a significant JIT penalty for C# start-up.
+
+## C# Publishing
+
+```
+Normal publish:
+
+	dotnet publish -c Release
+
+Self-contained publish:
+
+	dotnet publish -c Release -r win-x64 --self-contained true
+	dotnet publish -c Release -r linux-x64 --self-contained true
+	dotnet publish -c Release -r osx-x64 --self-contained true
+
+You can also enable Single File publish by uncommenting the following in the .csproj file:
+
+	<PublishSingleFile>true</PublishSingleFile>
+	<SelfContained>true</SelfContained>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+Then just run the normal publish command.
+```
