@@ -2,12 +2,12 @@ using System.Reflection;
 
 namespace GitVersion;
 
-public readonly struct VersionInfo
+public class VersionInfo
 {
 	/// <summary>
 	/// Version string eg "1.0.0.0"
 	/// </summary>
-	public string Version
+	public string? Version
 	{
 		get; init;
 	}
@@ -15,9 +15,9 @@ public readonly struct VersionInfo
 	/// <summary>
 	/// Git hash eg "a1b2c3d4e5f6"
 	/// </summary>
-	public string GitHash
+	public string? GitHash
 	{
-		get; init;
+		get; private set;
 	}
 
 	/// <summary>
@@ -25,7 +25,7 @@ public readonly struct VersionInfo
 	/// </summary>
 	public bool GitModified
 	{
-		get; init;
+		get; private set;
 	}
 
 	/// <summary>
@@ -35,8 +35,10 @@ public readonly struct VersionInfo
 
 	public string GetHash(int? len = null)
 	{
-		if (Version == string.Empty && GitHash == string.Empty)
+		if (string.IsNullOrEmpty(Version) && string.IsNullOrEmpty(GitHash))
 			return "(unknown)";
+
+		GitHash ??= string.Empty;
 
 		if (len == null)
 			return GitHash;
@@ -46,8 +48,10 @@ public readonly struct VersionInfo
 
 	public string GetVersionHash(int? len = null)
 	{
-		if (Version == string.Empty && GitHash == string.Empty)
+		if (string.IsNullOrEmpty(Version) && string.IsNullOrEmpty(GitHash))
 			return "(unknown)";
+
+		GitHash ??= string.Empty;
 
 		if (len == null)
 			return $"v{Version} - {GitHash}";

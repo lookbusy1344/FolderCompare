@@ -15,16 +15,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64</Platforms>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>	
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	
-	<!-- UNCOMMENT THIS FOR A SELF CONTAINED BINARY -->
-	
-<!--
-	<PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
--->
-	
+	<AnalysisModeDesign>All</AnalysisModeDesign>
+    <AnalysisModeSecurity>All</AnalysisModeSecurity>
+	<AnalysisModePerformance>All</AnalysisModePerformance>
+	<AnalysisModeReliability>All</AnalysisModeReliability>
+	<AnalysisModeUsage>All</AnalysisModeUsage>
   </PropertyGroup>
   
   <ItemGroup>

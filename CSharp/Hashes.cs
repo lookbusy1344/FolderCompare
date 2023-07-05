@@ -231,6 +231,8 @@ public static class HashBuilder
 	{
 		const int bufferSizeChars = 1024;
 
+		if (string.IsNullOrEmpty(text)) return Sha2Value.Empty;
+
 		// buffer is 1024 chars, which is 1024-3072 bytes
 		Span<byte> buffer = stackalloc byte[bufferSizeChars * 3];
 		Span<byte> hash = stackalloc byte[32];
