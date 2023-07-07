@@ -1,0 +1,6 @@
+\\?\C:\dev\Rust\FolderCompare\Testing\foldera\No match X.txt
+\\?\C:\dev\Rust\FolderCompare\Testing\foldera\name match.txt
+\\?\C:\dev\Rust\FolderCompare\Testing\foldera\Hash match X.txt
+\\?\C:\dev\Rust\FolderCompare\Testing\folderb\B\No match Y.txt
+\\?\C:\dev\Rust\FolderCompare\Testing\folderb\B\Hash match Y.txt
+\\?\C:\dev\Rust\FolderCompare\Testing\folderb\B\name match.txt

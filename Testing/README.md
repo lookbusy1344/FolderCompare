@@ -12,8 +12,16 @@
 ## Run with
 
 ```
-folder_compare.exe -a ./Testing/foldera -b ./Testing/folderb -c name
-folder_compare.exe -a ./Testing/foldera -b ./Testing/folderb -c namesize
-folder_compare.exe -a ./Testing/foldera -b ./Testing/folderb -c namehash
+folder_compare.exe -a ./Testing/foldera -b ./Testing/folderb -c name -r
+folder_compare.exe -a ./Testing/foldera -b ./Testing/folderb -c namesize -r
+folder_compare.exe -a ./Testing/foldera -b ./Testing/folderb -c hash -r
+```
 
+## Testing scripts
+
+Two Powershell scripts are provided, to test both versions and compare the output with the expected results.
+
+```
+PS > .\TestCSharp.ps1
+PS > .\TestRust.ps1
 ```
