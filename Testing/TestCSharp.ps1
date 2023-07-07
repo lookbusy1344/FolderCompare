@@ -28,3 +28,16 @@ $results3 = Compare-Object $expected3 $actual3
 displayresults "Compare by name" $results1
 displayresults "Compare by name+size" $results2
 displayresults "Compare by hash" $results3
+
+
+<# function Compare-Folders([string]$comparisonType) {
+    $expected = Get-Content -Path "./csharpresults_$comparisonType.txt" | Sort-Object
+    $actual = foldercompare.exe -a ./foldera -b ./folderb -c $comparisonType -r | Sort-Object
+    $results = Compare-Object $expected $actual
+    displayresults "Compare by $comparisonType" $results
+}
+
+Compare-Folders "name"
+Compare-Folders "namesize"
+Compare-Folders "hash"
+ #>
