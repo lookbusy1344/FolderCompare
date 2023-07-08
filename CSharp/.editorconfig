@@ -371,3 +371,5 @@ dotnet_diagnostic.CA2213.severity = warning
 dotnet_diagnostic.CA1031.severity = none
 dotnet_diagnostic.CA2201.severity = none
 dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA2100.severity = none
+dotnet_diagnostic.CA5394.severity = none
