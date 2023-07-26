@@ -8,6 +8,7 @@ namespace FolderCompare;
 /// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
 /// </summary>
+[System.Diagnostics.DebuggerDisplay("a: {a}, b: {b}, c: {c}, d: {d}")]
 public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 {
 	public static readonly Sha2Value Empty = new(0, 0, 0, 0);
@@ -71,6 +72,7 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 /// <summary>
 /// A struct record holding the SHA-1 hash of a file. This is a value type for speed
 /// </summary>
+[System.Diagnostics.DebuggerDisplay("a: {a}, b: {b}, c: {c}, d: {d}, e: {e}")]
 public readonly record struct Sha1Value(uint a, uint b, uint c, uint d, uint e)
 {
 	public static readonly Sha1Value Empty = new(0, 0, 0, 0, 0);
