@@ -2,7 +2,7 @@
 root = true
 
 # C# files
-[*.cs]
+[*.{cs,cshtml,razor}]
 
 #### Core EditorConfig Options ####
 
@@ -268,7 +268,7 @@ dotnet_style_qualification_for_property = true:silent
 dotnet_style_qualification_for_method = false:silent
 dotnet_style_qualification_for_event = false:silent
 
-[*.cs]
+[*.{cs,cshtml,razor}]
 csharp_using_directive_placement = outside_namespace:silent
 csharp_prefer_simple_using_statement = true:warning
 csharp_prefer_braces = false:suggestion
@@ -316,7 +316,8 @@ csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
 csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
 csharp_style_prefer_not_pattern = true:suggestion
 csharp_style_prefer_extended_property_pattern = true:suggestion
-[*.{cs,vb}]
+
+[*.{cs,vb,cshtml,razor}]
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 4
 indent_size = 4
@@ -359,7 +360,7 @@ dotnet_analyzer_diagnostic.category-Performance.severity = warning
 dotnet_analyzer_diagnostic.category-Reliability.severity = warning
 dotnet_analyzer_diagnostic.category-Usage.severity = warning
 
-[*.{cs,vb}]
+[*.{cs,vb,cshtml,razor}]
 dotnet_diagnostic.CA2000.severity = warning
 dotnet_diagnostic.CA2011.severity = warning
 dotnet_diagnostic.CA2012.severity = warning
