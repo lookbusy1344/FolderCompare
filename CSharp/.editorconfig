@@ -360,6 +360,18 @@ dotnet_analyzer_diagnostic.category-Performance.severity = warning
 dotnet_analyzer_diagnostic.category-Reliability.severity = warning
 dotnet_analyzer_diagnostic.category-Usage.severity = warning
 
+# Spell checking
+
+[*.cs]
+spelling_languages = en-US,en-GB
+spelling_checkable_types = strings,identifiers,comments
+spelling_error_severity = information
+
+[*.md]
+spelling_languages = en-GB
+spelling_checkable_types = strings,identifiers,comments
+spelling_error_severity = information
+
 [*.{cs,vb,cshtml,razor}]
 dotnet_diagnostic.CA2000.severity = warning
 dotnet_diagnostic.CA2011.severity = warning
@@ -374,3 +386,4 @@ dotnet_diagnostic.CA2201.severity = none
 dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.CA2100.severity = none
 dotnet_diagnostic.CA5394.severity = none
+
