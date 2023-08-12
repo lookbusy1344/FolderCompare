@@ -1,13 +1,16 @@
-# FolderCompare
-## A toy project CLI to compare files in 2 directory trees, by name, or hash.
+# Folder Compare
 
-Two implementations are provided, `/CSharp` implemented in .NET 7 C#, and `/Rust` in Rust 1.70 (June 2023). Both have almost identical behaviour, but the Rust one is probably faster and the CSharp one has a couple of extra features. Use `-h` for information.
+## A small CLI project to compare files in 2 directory trees, by name, or hash.
+
+This project is implemented in two languages, Rust and C#. It was written to compare the performance of the two languages, and to explore their comparative ergonomics.
+
+The two implementations are in `/CSharp` implemented in .NET 7 C#, and `/Rust` in Rust 1.71 (August 2023). Both have almost identical behaviour. See below for benchmarks.
 
 Both were developed on Windows, but should work on Linux and Mac.
 
 ## Building
 
-Build the C# version use `dotnet publish -c Release` (Or Visual Studio 2022, which is free)
+Build the C# version use `dotnet publish -c Release` or the supplied `Publish.cmd` (Or Visual Studio 2022, which is free)
 
 Build the Rust version with `cargo build -r`
 
@@ -46,6 +49,8 @@ OPTIONS:
 ```
 
 Hashing uses SHA256 and is obviously much slower than just comparing on name and/or size.
+
+## Implementation notes
 
 Implementing pluggable comparers (name / name & size / hash) is more difficult in Rust than in C#. C# allows different implementations of `IEqualityComparer<FileData>`.
 
@@ -86,4 +91,16 @@ You can also enable Single File publish by uncommenting the following in the .cs
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
 Then just run the normal publish command.
+```
+
+`Publish.cmd` is provided to simplify publishing.
+
+## Testing scripts
+
+Tests are written in Powershell, so they can be used for both implementations.
+
+```
+PS > cd .\Testing
+PS > .\TestCSharp.ps1
+PS > .\TestRust.ps1
 ```
