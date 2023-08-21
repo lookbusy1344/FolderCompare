@@ -169,8 +169,11 @@ public static class HashBuilder
 	/// </summary>
 	public static Sha2Value ComputeHashOfFile(string file)
 	{
+		Span<byte> hash = stackalloc byte[32];
 		using var stream = File.OpenRead(file);
-		var hash = SHA256.HashData(stream);
+		if (SHA256.HashData(stream, hash) != 32)
+			throw new Exception("Failed to compute hash");
+
 		return Sha2Value.Create(hash);
 	}
 
