@@ -167,7 +167,7 @@ public static class HashBuilder
 	/// <summary>
 	/// Compute the SHA256 hash of a file. This uses heap allocation
 	/// </summary>
-	public static Sha2Value ComputeHashOfFile(string file)
+	public static Sha2Value ComputeHashOfFile(in string file)
 	{
 		Span<byte> hash = stackalloc byte[32];
 		using var stream = File.OpenRead(file);
@@ -180,7 +180,7 @@ public static class HashBuilder
 	/// <summary>
 	/// Compute the SHA256 hash of a file, without heap allocations
 	/// </summary>
-	public static Sha2Value ComputeHashOfFileNoAlloc(string file)
+	public static Sha2Value ComputeHashOfFileNoAlloc(in string file)
 	{
 		using var stream = File.OpenRead(file);
 		Span<byte> buffer = stackalloc byte[4096];
@@ -199,7 +199,7 @@ public static class HashBuilder
 	/// Compute the SHA256 hash of a string.
 	/// Converting string to bytes is a heap allocation
 	/// </summary>
-	public static Sha2Value ComputeHashOfString(string text)
+	public static Sha2Value ComputeHashOfString(in string text)
 	{
 		Span<byte> hash = stackalloc byte[32];
 		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _))
@@ -210,7 +210,7 @@ public static class HashBuilder
 	/// <summary>
 	/// Compute the SHA256 hash of a string, without heap allocations
 	/// </summary>
-	public static Sha2Value ComputeHashOfStringNoAlloc(string text)
+	public static Sha2Value ComputeHashOfStringNoAlloc(in string text)
 	{
 		// convert string to bytes on the stack
 		var byteCount = Encoding.UTF8.GetByteCount(text);
@@ -232,7 +232,7 @@ public static class HashBuilder
 	/// Compute the SHA256 hash of a string, by processing the string in chunks without heap allocations
 	/// This uses a smaller buffer than ComputeHashOfStringNoAlloc
 	/// </summary>
-	public static Sha2Value ComputeHashOfStringNoAlloc2(string text)
+	public static Sha2Value ComputeHashOfStringNoAlloc2(in string text)
 	{
 		const int bufferSizeChars = 1024;
 
