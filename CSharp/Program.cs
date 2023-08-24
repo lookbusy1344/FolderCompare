@@ -2,18 +2,18 @@
 
 namespace FolderCompare;
 
-internal class Program
+internal static class Program
 {
 	public static void Main(string[] args)
 	{
 		try
 		{
-			var parsed = Parser.Default.ParseArguments<CliOptions>(args)
-				.WithParsed<CliOptions>(o =>
-				{
-				}).WithNotParsed<CliOptions>(o =>
-				{
-				});
+			var parsed = Parser.Default.ParseArguments<CliOptions>(args);
+			//.WithParsed<CliOptions>(o =>
+			//{
+			//}).WithNotParsed<CliOptions>(o =>
+			//{
+			//});
 
 			if (parsed.Tag == ParserResultType.NotParsed)
 				return;
@@ -21,7 +21,6 @@ internal class Program
 			var info = GitVersion.VersionInfo.Get();
 			if (!parsed.Value.Raw)
 				Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
-
 
 			var path1 = parsed.Value.FolderA!.FullName;
 			var path2 = parsed.Value.FolderB!.FullName;
