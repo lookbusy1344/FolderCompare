@@ -7,26 +7,17 @@ public class VersionInfo
 	/// <summary>
 	/// Version string eg "1.0.0.0"
 	/// </summary>
-	public string? Version
-	{
-		get; init;
-	}
+	public string? Version { get; init; }
 
 	/// <summary>
 	/// Git hash eg "a1b2c3d4e5f6"
 	/// </summary>
-	public string? GitHash
-	{
-		get; private set;
-	}
+	public string? GitHash { get; private set; }
 
 	/// <summary>
 	/// Git modified flag
 	/// </summary>
-	public bool GitModified
-	{
-		get; private set;
-	}
+	public bool GitModified { get; private set; }
 
 	/// <summary>
 	/// An empty version info
