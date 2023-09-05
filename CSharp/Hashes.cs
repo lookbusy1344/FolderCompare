@@ -3,6 +3,7 @@ using System.Text;
 
 namespace FolderCompare;
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE1006 // Upper case first letter for public members
 
 /// <summary>

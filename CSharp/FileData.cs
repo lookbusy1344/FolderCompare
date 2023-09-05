@@ -1,4 +1,16 @@
-﻿namespace FolderCompare;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FolderCompare;
+
+public enum ComparisonType
+{
+	[Display(Name = "NameSize")]
+	NameSize,
+	[Display(Name = "Name")]
+	Name,
+	[Display(Name = "Hash")]
+	Hash
+}
 
 /// <summary>
 /// Record holding information about a file
