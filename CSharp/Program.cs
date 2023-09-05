@@ -1,81 +1,137 @@
-﻿using CommandLine;
+﻿
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace FolderCompare;
 
 internal static class Program
 {
-	public static void Main(string[] args)
+	public static int Main(string[] args)
 	{
 		try
 		{
-			var parsed = Parser.Default.ParseArguments<CliOptions>(args);
-			//.WithParsed<CliOptions>(o =>
-			//{
-			//}).WithNotParsed<CliOptions>(o =>
-			//{
-			//});
-
-			if (parsed.Tag == ParserResultType.NotParsed)
-				return;
-
-			var info = GitVersion.VersionInfo.Get();
-			if (!parsed.Value.Raw)
-				Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
-
-			var path1 = parsed.Value.FolderA!.FullName;
-			var path2 = parsed.Value.FolderB!.FullName;
-
-			if (path1 == path2) throw new Exception("The two folders must be different");
-
-			// we need two comparers because we enumerate both folders in parallel
-			var comparer1 = BuildComparer(parsed.Value.Compare);
-			var comparer2 = BuildComparer(parsed.Value.Compare);
-
-			if (!parsed.Value.Raw)
-				Console.WriteLine($"Comparing \"{path1}\" and \"{path2}\" using {parsed.Value.Compare} comparison...");
-
-			HashSet<FileData> files1, files2;
-			if (parsed.Value.OneThread)
-			{
-				if (!parsed.Value.Raw)
-					Console.WriteLine($"Scanning {path1}...");
-				files1 = ScanFolder(parsed.Value.FolderA!, !parsed.Value.Raw, comparer1);
-				if (!parsed.Value.Raw)
-					Console.WriteLine($"Scanning {path2}...");
-				files2 = ScanFolder(parsed.Value.FolderB!, !parsed.Value.Raw, comparer2);
-			}
-			else
-			{
-				// scan both folders in parallel
-				var task1 = Task.Run(() => ScanFolder(parsed.Value.FolderA!, false, comparer1));
-				var task2 = Task.Run(() => ScanFolder(parsed.Value.FolderB!, false, comparer2));
-				Task.WaitAll(task1, task2);
-
-				if (task1.IsFaulted) throw task1.Exception!;
-				if (task2.IsFaulted) throw task2.Exception!;
-
-				files1 = task1.Result;
-				files2 = task2.Result;
-			}
-
-			if (files1.Count == 0) throw new Exception($"No files found in {path1}");
-			if (files2.Count == 0) throw new Exception($"No files found in {path2}");
-
-			var c1 = CompareSets(files1, files2, path1, path2, comparer1, parsed.Value.Raw);
-			var c2 = 0;
-			if (!parsed.Value.FirstOnly)
-				c2 = CompareSets(files2, files1, path2, path1, comparer1, parsed.Value.Raw);
-
-			if (!parsed.Value.Raw)
-			{
-				Console.WriteLine();
-				Console.WriteLine($"There are {c1 + c2} differences");
-			}
+			var rootCommand = BuildRootCommand();
+			return rootCommand.Invoke(args);
 		}
 		catch (Exception ex)
 		{
 			Console.Error.WriteLine($"ERROR: {ex.Message}");
+			return 99;
 		}
+	}
+
+	/// <summary>
+	/// Handle the parsed command line arguments
+	/// </summary>
+	private static void ProcessParsedArgs(DirectoryInfo foldera, DirectoryInfo folderb, ComparisonType comparison, bool onethread, bool raw, bool firstonly)
+	{
+		var info = GitVersion.VersionInfo.Get();
+		if (!raw)
+			Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
+
+		var path1 = foldera.FullName;
+		var path2 = folderb.FullName;
+
+		if (path1 == path2) throw new Exception("The two folders must be different");
+
+		// we need two comparers because we enumerate both folders in parallel
+		var comparer1 = BuildComparer(comparison);
+		var comparer2 = BuildComparer(comparison);
+
+		if (!raw)
+			Console.WriteLine($"Comparing \"{path1}\" and \"{path2}\" using {comparison} comparison...");
+
+		HashSet<FileData> files1, files2;
+		if (onethread)
+		{
+			if (!raw)
+				Console.WriteLine($"Scanning {path1}...");
+			files1 = ScanFolder(foldera, !raw, comparer1);
+
+			if (!raw)
+				Console.WriteLine($"Scanning {path2}...");
+			files2 = ScanFolder(folderb, !raw, comparer2);
+		}
+		else
+		{
+			// scan both folders in parallel
+			var task1 = Task.Run(() => ScanFolder(foldera, false, comparer1));
+			var task2 = Task.Run(() => ScanFolder(folderb, false, comparer2));
+			Task.WaitAll(task1, task2);
+
+			if (task1.IsFaulted) throw task1.Exception!;
+			if (task2.IsFaulted) throw task2.Exception!;
+
+			files1 = task1.Result;
+			files2 = task2.Result;
+		}
+
+		if (files1.Count == 0) throw new Exception($"No files found in {path1}");
+		if (files2.Count == 0) throw new Exception($"No files found in {path2}");
+
+		var c1 = CompareSets(files1, files2, path1, path2, comparer1, raw);
+		var c2 = 0;
+		if (!firstonly)
+			c2 = CompareSets(files2, files1, path2, path1, comparer1, raw);
+
+		if (!raw)
+		{
+			Console.WriteLine();
+			Console.WriteLine($"There are {c1 + c2} differences");
+		}
+	}
+
+	/// <summary>
+	/// Set up the root command for parsing CLI arguments
+	/// </summary>
+	private static RootCommand BuildRootCommand()
+	{
+		var folderAOption = new Option<DirectoryInfo>(
+			aliases: new[] { "-a", "--foldera" },
+			description: "Folder A to search")
+		{
+			IsRequired = true
+		};
+
+		var folderBOption = new Option<DirectoryInfo>(
+			aliases: new[] { "-b", "--folderb" },
+			description: "Folder B to search")
+		{
+			IsRequired = true
+		};
+
+		var comparisonOption = new Option<ComparisonType>(
+			aliases: new[] { "-c", "--comparison" },
+			getDefaultValue: () => ComparisonType.Name,
+			description: "Comparison type: name, namesize, hash");
+
+		var onethreadFlag = new Option<bool>(
+			aliases: new[] { "-o", "--one-thread" },
+			getDefaultValue: () => false,
+			description: "Use only one thread");
+
+		var rawFlag = new Option<bool>(
+			aliases: new[] { "-r", "--raw" },
+			getDefaultValue: () => false,
+			description: "Raw output, for piping");
+
+		var firstonlyFlag = new Option<bool>(
+			aliases: new[] { "-f", "--first-only" },
+			getDefaultValue: () => false,
+			description: "Only show files in A missing in B");
+
+		var ver = GitVersion.VersionInfo.Get();
+		var rootCommand = new RootCommand($"FolderCompare .NET {ver.GetVersionHash(20)}");
+		rootCommand.AddOption(folderAOption);
+		rootCommand.AddOption(folderBOption);
+		rootCommand.AddOption(comparisonOption);
+		rootCommand.AddOption(onethreadFlag);
+		rootCommand.AddOption(rawFlag);
+		rootCommand.AddOption(firstonlyFlag);
+
+		rootCommand.SetHandler(ProcessParsedArgs, folderAOption, folderBOption, comparisonOption, onethreadFlag, rawFlag, firstonlyFlag);
+
+		return rootCommand;
 	}
 
 	/// <summary>
@@ -83,9 +139,9 @@ internal static class Program
 	/// </summary>
 	private static IEqualityComparer<FileData> BuildComparer(ComparisonType t) => t switch
 	{
-		ComparisonType.namesize => new FileDataNameSizeComparer(),
-		ComparisonType.name => new FileDataNameComparer(),
-		ComparisonType.hash => new FileDataHashComparer(),
+		ComparisonType.NameSize => new FileDataNameSizeComparer(),
+		ComparisonType.Name => new FileDataNameComparer(),
+		ComparisonType.Hash => new FileDataHashComparer(),
 		_ => throw new NotImplementedException(),
 	};
 
