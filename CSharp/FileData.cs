@@ -12,6 +12,31 @@ public enum ComparisonType
 	Hash
 }
 
+public class CliOptions
+{
+	public DirectoryInfo? FolderA { get; init; }
+
+	public DirectoryInfo? FolderB { get; init; }
+
+	public ComparisonType Compare { get; init; }
+
+	public bool OneThread { get; init; }
+
+	public bool Raw { get; init; }
+
+	public bool FirstOnly { get; init; }
+
+	public CliOptions(DirectoryInfo? folderA, DirectoryInfo? folderB, ComparisonType compare, bool oneThread, bool raw, bool firstOnly)
+	{
+		FolderA = folderA;
+		FolderB = folderB;
+		Compare = compare;
+		OneThread = oneThread;
+		Raw = raw;
+		FirstOnly = firstOnly;
+	}
+}
+
 /// <summary>
 /// Record holding information about a file
 /// </summary>

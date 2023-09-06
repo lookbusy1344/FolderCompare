@@ -22,40 +22,40 @@ internal static class Program
 	/// <summary>
 	/// Handle the parsed command line arguments
 	/// </summary>
-	private static void ProcessParsedArgs(DirectoryInfo foldera, DirectoryInfo folderb, ComparisonType comparison, bool onethread, bool raw, bool firstonly)
+	private static void ProcessParsedArgs(CliOptions opts)
 	{
 		var info = GitVersion.VersionInfo.Get();
-		if (!raw)
+		if (!opts.Raw)
 			Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
 
-		var path1 = foldera.FullName;
-		var path2 = folderb.FullName;
+		var path1 = opts.FolderA!.FullName;
+		var path2 = opts.FolderB!.FullName;
 
 		if (path1 == path2) throw new Exception("The two folders must be different");
 
 		// we need two comparers because we enumerate both folders in parallel
-		var comparer1 = BuildComparer(comparison);
-		var comparer2 = BuildComparer(comparison);
+		var comparer1 = BuildComparer(opts.Compare);
+		var comparer2 = BuildComparer(opts.Compare);
 
-		if (!raw)
-			Console.WriteLine($"Comparing \"{path1}\" and \"{path2}\" using {comparison} comparison...");
+		if (!opts.Raw)
+			Console.WriteLine($"Comparing \"{path1}\" and \"{path2}\" using {opts.Compare} comparison...");
 
 		HashSet<FileData> files1, files2;
-		if (onethread)
+		if (opts.OneThread)
 		{
-			if (!raw)
+			if (!opts.Raw)
 				Console.WriteLine($"Scanning {path1}...");
-			files1 = ScanFolder(foldera, !raw, comparer1);
+			files1 = ScanFolder(opts.FolderA, !opts.Raw, comparer1);
 
-			if (!raw)
+			if (!opts.Raw)
 				Console.WriteLine($"Scanning {path2}...");
-			files2 = ScanFolder(folderb, !raw, comparer2);
+			files2 = ScanFolder(opts.FolderB, !opts.Raw, comparer2);
 		}
 		else
 		{
 			// scan both folders in parallel
-			var task1 = Task.Run(() => ScanFolder(foldera, false, comparer1));
-			var task2 = Task.Run(() => ScanFolder(folderb, false, comparer2));
+			var task1 = Task.Run(() => ScanFolder(opts.FolderA, false, comparer1));
+			var task2 = Task.Run(() => ScanFolder(opts.FolderB, false, comparer2));
 			Task.WaitAll(task1, task2);
 
 			if (task1.IsFaulted) throw task1.Exception!;
@@ -68,12 +68,12 @@ internal static class Program
 		if (files1.Count == 0) throw new Exception($"No files found in {path1}");
 		if (files2.Count == 0) throw new Exception($"No files found in {path2}");
 
-		var c1 = CompareSets(files1, files2, path1, path2, comparer1, raw);
+		var c1 = CompareSets(files1, files2, path1, path2, comparer1, opts.Raw);
 		var c2 = 0;
-		if (!firstonly)
-			c2 = CompareSets(files2, files1, path2, path1, comparer1, raw);
+		if (!opts.FirstOnly)
+			c2 = CompareSets(files2, files1, path2, path1, comparer1, opts.Raw);
 
-		if (!raw)
+		if (!opts.Raw)
 		{
 			Console.WriteLine();
 			Console.WriteLine($"There are {c1 + c2} differences");
@@ -128,7 +128,23 @@ internal static class Program
 		rootCommand.AddOption(rawFlag);
 		rootCommand.AddOption(firstonlyFlag);
 
-		rootCommand.SetHandler(ProcessParsedArgs, folderAOption, folderBOption, comparisonOption, onethreadFlag, rawFlag, firstonlyFlag);
+		// this was simpler, but theres a risk of mixing up the params
+		// rootCommand.SetHandler(ProcessParsedArgs, folderAOption, folderBOption, comparisonOption, onethreadFlag, rawFlag, firstonlyFlag);
+
+		rootCommand.SetHandler(context =>
+		{
+			// build the options object
+			var cliopts = new CliOptions(
+				folderA: context.ParseResult.GetValueForOption(folderAOption),
+				folderB: context.ParseResult.GetValueForOption(folderBOption),
+				compare: context.ParseResult.GetValueForOption(comparisonOption),
+				oneThread: context.ParseResult.GetValueForOption(onethreadFlag),
+				raw: context.ParseResult.GetValueForOption(rawFlag),
+				firstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
+
+			// and process it
+			ProcessParsedArgs(cliopts);
+		});
 
 		return rootCommand;
 	}
