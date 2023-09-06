@@ -7,16 +7,8 @@ internal static class Program
 {
 	public static int Main(string[] args)
 	{
-		try
-		{
-			var rootCommand = BuildRootCommand();
-			return rootCommand.Invoke(args);
-		}
-		catch (Exception ex)
-		{
-			Console.Error.WriteLine($"ERROR: {ex.Message}");
-			return 99;
-		}
+		var rootCommand = BuildRootCommand();
+		return rootCommand.Invoke(args);
 	}
 
 	/// <summary>
@@ -32,6 +24,8 @@ internal static class Program
 		var path2 = opts.FolderB!.FullName;
 
 		if (path1 == path2) throw new Exception("The two folders must be different");
+		if (!opts.FolderA.Exists) throw new Exception($"Folder {path1} does not exist");
+		if (!opts.FolderB.Exists) throw new Exception($"Folder {path2} does not exist");
 
 		// we need two comparers because we enumerate both folders in parallel
 		var comparer1 = BuildComparer(opts.Compare);
@@ -133,17 +127,26 @@ internal static class Program
 
 		rootCommand.SetHandler(context =>
 		{
-			// build the options object
-			var cliopts = new CliOptions(
-				folderA: context.ParseResult.GetValueForOption(folderAOption),
-				folderB: context.ParseResult.GetValueForOption(folderBOption),
-				compare: context.ParseResult.GetValueForOption(comparisonOption),
-				oneThread: context.ParseResult.GetValueForOption(onethreadFlag),
-				raw: context.ParseResult.GetValueForOption(rawFlag),
-				firstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
+			try
+			{
+				// build the options object
+				var cliopts = new CliOptions(
+					folderA: context.ParseResult.GetValueForOption(folderAOption),
+					folderB: context.ParseResult.GetValueForOption(folderBOption),
+					compare: context.ParseResult.GetValueForOption(comparisonOption),
+					oneThread: context.ParseResult.GetValueForOption(onethreadFlag),
+					raw: context.ParseResult.GetValueForOption(rawFlag),
+					firstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
 
-			// and process it
-			ProcessParsedArgs(cliopts);
+				// and process it
+				ProcessParsedArgs(cliopts);
+				context.ExitCode = 0;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"ERROR: {ex.Message}");
+				context.ExitCode = 1;
+			}
 		});
 
 		return rootCommand;
