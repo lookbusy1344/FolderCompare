@@ -20,7 +20,7 @@ fn main() -> anyhow::Result<()> {
     let raw = pargs.contains(["-r", "--raw"]);
     if !raw {
         println!(
-            "Rust Folder Comparer, ver: {}, commit: {}",
+            "Folder_comparer Rust, ver: {}, commit: {}",
             VERSION.unwrap_or("?"),
             GIT_VERSION
         );
