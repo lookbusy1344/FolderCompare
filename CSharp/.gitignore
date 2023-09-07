@@ -2,3 +2,4 @@
 /obj/
 /.vs/
 /Properties/launchSettings.json
+/*.csproj.user
