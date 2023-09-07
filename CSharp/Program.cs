@@ -1,6 +1,4 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 
 namespace FolderCompare;
@@ -79,7 +77,7 @@ internal static class Program
 	/// <summary>
 	/// Set up the root command for parsing CLI arguments
 	/// </summary>
-	private static Parser BuildRootCommand()
+	private static RootCommand BuildRootCommand()
 	{
 		var folderAOption = new Option<DirectoryInfo>(
 			aliases: new[] { "-a", "--foldera" },
@@ -129,34 +127,29 @@ internal static class Program
 
 		rootCommand.SetHandler(context =>
 		{
-			// defensively set the exit code as an error
-			context.ExitCode = 2;
+			try
+			{
+				// build the options object
+				var cliopts = new CliOptions(
+					folderA: context.ParseResult.GetValueForOption(folderAOption),
+					folderB: context.ParseResult.GetValueForOption(folderBOption),
+					compare: context.ParseResult.GetValueForOption(comparisonOption),
+					oneThread: context.ParseResult.GetValueForOption(onethreadFlag),
+					raw: context.ParseResult.GetValueForOption(rawFlag),
+					firstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
 
-			// build the options object
-			var cliopts = new CliOptions(
-				folderA: context.ParseResult.GetValueForOption(folderAOption),
-				folderB: context.ParseResult.GetValueForOption(folderBOption),
-				compare: context.ParseResult.GetValueForOption(comparisonOption),
-				oneThread: context.ParseResult.GetValueForOption(onethreadFlag),
-				raw: context.ParseResult.GetValueForOption(rawFlag),
-				firstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
-
-			// and process it
-			ProcessParsedArgs(cliopts);
-
-			// if we get this far, we succeeded
-			context.ExitCode = 0;
+				// and process it
+				ProcessParsedArgs(cliopts);
+				context.ExitCode = 0;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"ERROR: {ex.Message}");
+				context.ExitCode = 1;
+			}
 		});
 
-		// Use the exception handler to catch any exceptions and write them to the console error stream
-		var builder = new CommandLineBuilder(rootCommand);
-		_ = builder.UseExceptionHandler((ex, context) =>
-		{
-			context.Console.Error.WriteLine($"ERROR: {ex.Message}");
-			context.ExitCode = 1;
-		});
-
-		return builder.Build();
+		return rootCommand;
 	}
 
 	/// <summary>
