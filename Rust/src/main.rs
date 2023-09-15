@@ -53,6 +53,12 @@ fn main() -> anyhow::Result<()> {
         onethread: pargs.contains(["-o", "--one-thread"]),
     };
 
+    // Check for unused arguments, and error out if there are any
+    let unused = pargs.finish();
+    if !unused.is_empty() {
+        return Err(anyhow::anyhow!("Unused arguments: {:?}", unused));
+    }
+
     // comparing a folder with itself is pointless
     if config.folder1 == config.folder2 {
         return Err(anyhow::anyhow!("Folders should not be the same"));

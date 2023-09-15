@@ -61,6 +61,7 @@ pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<Sha2Value> {
     Ok(Sha2Value::new(&h))
 }
 
+/*
 /// Hash a string slice using the given hasher as a Digest implementation
 /// Returns a `Sha2Value`, which is a wrapper around a [u8; 32]
 /// # Errors
@@ -74,3 +75,4 @@ pub fn hash_str<D: Digest>(text: &str) -> anyhow::Result<Sha2Value> {
 
     Ok(Sha2Value::new(&h))
 }
+*/
