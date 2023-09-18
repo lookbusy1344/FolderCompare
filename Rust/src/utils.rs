@@ -76,3 +76,13 @@ pub fn hash_str<D: Digest>(text: &str) -> anyhow::Result<Sha2Value> {
     Ok(Sha2Value::new(&h))
 }
 */
+
+/// Check for unused arguments, and error out if there are any
+pub fn args_finished(args: pico_args::Arguments) -> anyhow::Result<()> {
+    let unused = args.finish();
+    if unused.is_empty() {
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!("Unused arguments: {:?}", unused))
+    }
+}

@@ -54,10 +54,7 @@ fn main() -> anyhow::Result<()> {
     };
 
     // Check for unused arguments, and error out if there are any
-    let unused = pargs.finish();
-    if !unused.is_empty() {
-        return Err(anyhow::anyhow!("Unused arguments: {:?}", unused));
-    }
+    args_finished(pargs)?;
 
     // comparing a folder with itself is pointless
     if config.folder1 == config.folder2 {
