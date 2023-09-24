@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use crate::filedata::{FileDataCompareOption, Sha2Value};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
-pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=*"]);
+pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=+"]);
 
 pub const HELP: &str = "\
 USAGE:
