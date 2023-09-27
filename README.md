@@ -20,11 +20,14 @@ Build the Rust version with `cargo build -r`
 ## Details
 The program walks the first folder tree (given by `-a`) and records all filenames, sizes and optionally hashes. It does the same with the second folder tree (given by `-b`). Files are compared (using `-c`) and differences listed. Comparison can be via:
 
-```
-    Name        Filename only (default, fast)
-    NameSize    Filename and file size (fast)
-    Hash        SHA2 hash, disregarding filenames (slow)
-```
+| Comparison | Description |
+| -- | -- |
+| --comparison Name       | Filename only (default, fast) |
+| --comparison NameSize   | Filename and file size (fast) |
+| --comparison Hash       | SHA2 hash, disregarding filenames (slow) |
+
+Comparison by name only checks the filename itself, not the path. Eg `a/b/file.txt` and `d/e/file.txt` will be considered the same file.
+
 
 ## Usage
 
