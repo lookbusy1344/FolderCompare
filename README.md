@@ -1,5 +1,8 @@
 # Folder Compare
 
+[![Building Rust app](https://github.com/lookbusy1344/FolderCompare/actions/workflows/Rust%20build.yml/badge.svg)](https://github.com/lookbusy1344/FolderCompare/actions/workflows/Rust%20build.yml)
+[![CodeQL](https://github.com/lookbusy1344/FolderCompare/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/lookbusy1344/FolderCompare/actions/workflows/github-code-scanning/codeql)
+
 ## A small CLI project to compare files in 2 directory trees, by name, or hash.
 
 This project is implemented in two languages, Rust and C#. It was written to compare the performance of the two languages, and to explore their comparative ergonomics.
