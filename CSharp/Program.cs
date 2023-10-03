@@ -7,8 +7,6 @@ internal static class Program
 {
 	public static int Main(string[] args)
 	{
-		JS_Tools.ValueEquality.CheckAssembly();
-
 		var rootCommand = BuildRootCommand();
 		return rootCommand.Invoke(args);
 	}
