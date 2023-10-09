@@ -7,7 +7,7 @@
 </Target>
 
   <PropertyGroup>
-  	<Version>1.0.4.0</Version> 
+  	<Version>1.0.5.0</Version> 
 	<InformationalVersion>$(SourceRevisionId)</InformationalVersion> 
 
     <OutputType>Exe</OutputType>
@@ -36,7 +36,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="lookbusy1344.RecordValueAnalyser" Version="0.9.6">
+    <PackageReference Include="lookbusy1344.RecordValueAnalyser" Version="0.9.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
