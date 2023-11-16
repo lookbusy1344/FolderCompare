@@ -7,26 +7,55 @@ namespace FolderCompare;
 #pragma warning disable IDE1006 // Upper case first letter for public members
 
 /// <summary>
+/// A struct containing an inline array of 4 ulongs, large enough for a SHA2 hash
+/// </summary>
+#pragma warning disable CA1815, IDE0051, IDE0044    // warnings related to inline arrays, nothing significant                                                             
+[System.Runtime.CompilerServices.InlineArray(4)]
+public struct InnerSha2
+{
+	private ulong _element0;
+}
+#pragma warning restore CA1815, IDE0051, IDE0044
+
+/// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("a: {a}, b: {b}, c: {c}, d: {d}")]
-public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
+[System.Diagnostics.DebuggerDisplay("a: {val[0]}, b: {val[1]}, c: {val[2]}, d: {val[3]}")]
+public readonly record struct Sha2Value
 {
-	public static readonly Sha2Value Empty = new(0, 0, 0, 0);
+	/// <summary>
+	/// Empty value
+	/// </summary>
+	public static readonly Sha2Value Empty;
 
 	/// <summary>
-	/// Create a Sha2Value from a byte span
+	/// The inline array of 4 ulongs
 	/// </summary>
-	public static Sha2Value Create(ReadOnlySpan<byte> bytes)
+	private readonly InnerSha2 val;
+
+	/// <summary>
+	/// Construct SHA2 value from 4 ulongs
+	/// </summary>
+	public Sha2Value(ulong a, ulong b, ulong c, ulong d)
+	{
+		val[0] = a;
+		val[1] = b;
+		val[2] = c;
+		val[3] = d;
+	}
+
+	/// <summary>
+	/// construct SHA2 value from a byte span
+	/// </summary>
+	public Sha2Value(ReadOnlySpan<byte> bytes)
 	{
 		if (bytes.Length != 32)
 			throw new ArgumentException("The byte span must contain exactly 32 bytes.", nameof(bytes));
 
-		return new(
-			a: BitConverter.ToUInt64(bytes[..8]),
-			b: BitConverter.ToUInt64(bytes.Slice(8, 8)),
-			c: BitConverter.ToUInt64(bytes.Slice(16, 8)),
-			d: BitConverter.ToUInt64(bytes.Slice(24, 8)));
+		val[0] = BitConverter.ToUInt64(bytes[..8]);
+		val[1] = BitConverter.ToUInt64(bytes.Slice(8, 8));
+		val[2] = BitConverter.ToUInt64(bytes.Slice(16, 8));
+		val[3] = BitConverter.ToUInt64(bytes.Slice(24, 8));
 	}
 
 	/// <summary>
@@ -35,10 +64,10 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 	public byte[] ToBytes()
 	{
 		var bytes = new byte[32];
-		HashUtils.WriteBytes(bytes.AsSpan(), a);
-		HashUtils.WriteBytes(bytes.AsSpan(sizeof(ulong)), b);
-		HashUtils.WriteBytes(bytes.AsSpan(2 * sizeof(ulong)), c);
-		HashUtils.WriteBytes(bytes.AsSpan(3 * sizeof(ulong)), d);
+		HashUtils.WriteBytes(bytes.AsSpan(), val[0]);
+		HashUtils.WriteBytes(bytes.AsSpan(sizeof(ulong)), val[1]);
+		HashUtils.WriteBytes(bytes.AsSpan(2 * sizeof(ulong)), val[2]);
+		HashUtils.WriteBytes(bytes.AsSpan(3 * sizeof(ulong)), val[3]);
 
 		return bytes;
 	}
@@ -51,10 +80,10 @@ public readonly record struct Sha2Value(ulong a, ulong b, ulong c, ulong d)
 		//if (bytes.Length != 32)
 		//	throw new ArgumentException("The byte span must contain exactly 32 bytes.", nameof(bytes));
 
-		HashUtils.WriteBytes(bytes, a);
-		HashUtils.WriteBytes(bytes[sizeof(ulong)..], b);
-		HashUtils.WriteBytes(bytes[(2 * sizeof(ulong))..], c);
-		HashUtils.WriteBytes(bytes[(3 * sizeof(ulong))..], d);
+		HashUtils.WriteBytes(bytes, val[0]);
+		HashUtils.WriteBytes(bytes[sizeof(ulong)..], val[1]);
+		HashUtils.WriteBytes(bytes[(2 * sizeof(ulong))..], val[2]);
+		HashUtils.WriteBytes(bytes[(3 * sizeof(ulong))..], val[3]);
 	}
 
 	public override string ToString()
@@ -175,7 +204,7 @@ public static class HashBuilder
 		if (SHA256.HashData(stream, hash) != 32)
 			throw new Exception("Failed to compute hash");
 
-		return Sha2Value.Create(hash);
+		return new Sha2Value(hash);
 	}
 
 	/// <summary>
@@ -193,7 +222,7 @@ public static class HashBuilder
 			if (!SHA256.TryHashData(buffer, hash, out _))
 				throw new Exception("Failed to compute hash");
 		}
-		return Sha2Value.Create(hash);
+		return new Sha2Value(hash);
 	}
 
 	/// <summary>
@@ -205,7 +234,7 @@ public static class HashBuilder
 		Span<byte> hash = stackalloc byte[32];
 		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _))
 			throw new Exception("Failed to compute hash");
-		return Sha2Value.Create(hash);
+		return new Sha2Value(hash);
 	}
 
 	/// <summary>
@@ -226,7 +255,7 @@ public static class HashBuilder
 		Span<byte> hash = stackalloc byte[32];
 		if (!SHA256.TryHashData(buffer, hash, out _))
 			throw new Exception("Failed to compute hash");
-		return Sha2Value.Create(hash);
+		return new Sha2Value(hash);
 	}
 
 	/// <summary>
@@ -267,7 +296,7 @@ public static class HashBuilder
 			charoffset += charsToCopy;
 		}
 
-		return Sha2Value.Create(hash);
+		return new Sha2Value(hash);
 	}
 }
 
