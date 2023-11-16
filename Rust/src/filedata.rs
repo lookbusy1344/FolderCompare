@@ -5,7 +5,7 @@ use strum::EnumString;
 // FileData struct and associated trait implementations
 // This struct can be used to compare files by name, name and size, or name and hash
 // According to a comparison marker struct (UniqueName, UniqueNameSize, UniqueHash)
-// Thoser markers must implement the UniqueTrait trait, as well as Eq, PartialEq and Hash
+// Those markers must implement the UniqueTrait trait, as well as Eq, PartialEq and Hash
 
 /// convert comparison string into an instance of `FileDataCompareOption`
 pub fn parse_comparer(
