@@ -20,7 +20,7 @@ public struct InnerSha2
 /// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("a: {val[0]}, b: {val[1]}, c: {val[2]}, d: {val[3]}")]
+[System.Diagnostics.DebuggerDisplay("{val[0]}-{val[1]}-{val[2]}-{val[3]}")]
 public readonly record struct Sha2Value
 {
 	/// <summary>
