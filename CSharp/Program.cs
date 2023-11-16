@@ -131,12 +131,12 @@ internal static class Program
 			{
 				// build the options object
 				var cliopts = new CliOptions(
-					folderA: context.ParseResult.GetValueForOption(folderAOption),
-					folderB: context.ParseResult.GetValueForOption(folderBOption),
-					compare: context.ParseResult.GetValueForOption(comparisonOption),
-					oneThread: context.ParseResult.GetValueForOption(onethreadFlag),
-					raw: context.ParseResult.GetValueForOption(rawFlag),
-					firstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
+					FolderA: context.ParseResult.GetValueForOption(folderAOption),
+					FolderB: context.ParseResult.GetValueForOption(folderBOption),
+					Compare: context.ParseResult.GetValueForOption(comparisonOption),
+					OneThread: context.ParseResult.GetValueForOption(onethreadFlag),
+					Raw: context.ParseResult.GetValueForOption(rawFlag),
+					FirstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
 
 				// and process it
 				ProcessParsedArgs(cliopts);
