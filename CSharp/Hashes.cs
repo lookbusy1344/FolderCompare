@@ -11,7 +11,7 @@ namespace FolderCompare;
 /// </summary>
 #pragma warning disable CA1815, IDE0051, IDE0044    // warnings related to inline arrays, nothing significant                                                             
 [System.Runtime.CompilerServices.InlineArray(4)]
-public struct InnerSha2
+internal struct InnerSha2
 {
 	private ulong _element0;
 }
@@ -19,12 +19,13 @@ public struct InnerSha2
 
 /// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
+/// 4 ulongs are 32 bytes in total
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("{val[0]}-{val[1]}-{val[2]}-{val[3]}")]
 public readonly record struct Sha2Value
 {
 	/// <summary>
-	/// Empty value
+	/// Empty value: 0, 0, 0, 0
 	/// </summary>
 	public static readonly Sha2Value Empty;
 
@@ -32,6 +33,16 @@ public readonly record struct Sha2Value
 	/// The inline array of 4 ulongs
 	/// </summary>
 	private readonly InnerSha2 val;
+
+	/// <summary>
+	/// Inline arrays lack automatic value semantics (like normal arrays), so we need to implement them manually
+	/// </summary>
+	public readonly bool Equals(Sha2Value other) => val[0] == other.val[0] && val[1] == other.val[1] && val[2] == other.val[2] && val[3] == other.val[3];
+
+	/// <summary>
+	/// For speed, just use the first ulong as the hash code
+	/// </summary>
+	public override readonly int GetHashCode() => val[0].GetHashCode();
 
 	/// <summary>
 	/// Construct SHA2 value from 4 ulongs
