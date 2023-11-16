@@ -14,7 +14,7 @@ internal static class Program
 	/// <summary>
 	/// Handle the parsed command line arguments
 	/// </summary>
-	private static void ProcessParsedArgs(CliOptions opts)
+	private static async Task ProcessParsedArgsAsync(CliOptions opts)
 	{
 		var info = GitVersion.VersionInfo.Get();
 		if (!opts.Raw)
@@ -50,13 +50,12 @@ internal static class Program
 			// scan both folders in parallel
 			var task1 = Task.Run(() => ScanFolder(opts.FolderA, false, comparer1));
 			var task2 = Task.Run(() => ScanFolder(opts.FolderB, false, comparer2));
-			Task.WaitAll(task1, task2);
 
-			if (task1.IsFaulted) throw task1.Exception!;
-			if (task2.IsFaulted) throw task2.Exception!;
+			// await both tasks
+			var result = await Task.WhenAll(task1, task2);
 
-			files1 = task1.Result;
-			files2 = task2.Result;
+			files1 = result[0];
+			files2 = result[1];
 		}
 
 		if (files1.Count == 0) throw new Exception($"No files found in {path1}");
@@ -125,7 +124,7 @@ internal static class Program
 		// this was simpler, but theres a risk of mixing up the params
 		// rootCommand.SetHandler(ProcessParsedArgs, folderAOption, folderBOption, comparisonOption, onethreadFlag, rawFlag, firstonlyFlag);
 
-		rootCommand.SetHandler(context =>
+		rootCommand.SetHandler(async context =>
 		{
 			try
 			{
@@ -139,7 +138,7 @@ internal static class Program
 					FirstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
 
 				// and process it
-				ProcessParsedArgs(cliopts);
+				await ProcessParsedArgsAsync(cliopts);
 				context.ExitCode = 0;
 			}
 			catch (Exception ex)
