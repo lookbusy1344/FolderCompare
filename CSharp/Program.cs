@@ -80,36 +80,36 @@ internal static class Program
 	private static RootCommand BuildRootCommand()
 	{
 		var folderAOption = new Option<DirectoryInfo>(
-			aliases: new[] { "-a", "--foldera" },
+			aliases: ["-a", "--foldera"],
 			description: "Folder A to search")
 		{
 			IsRequired = true
 		};
 
 		var folderBOption = new Option<DirectoryInfo>(
-			aliases: new[] { "-b", "--folderb" },
+			aliases: ["-b", "--folderb"],
 			description: "Folder B to search")
 		{
 			IsRequired = true
 		};
 
 		var comparisonOption = new Option<ComparisonType>(
-			aliases: new[] { "-c", "--comparison" },
+			aliases: ["-c", "--comparison"],
 			getDefaultValue: () => ComparisonType.Name,
 			description: "Comparison type: name, namesize, hash");
 
 		var onethreadFlag = new Option<bool>(
-			aliases: new[] { "-o", "--one-thread" },
+			aliases: ["-o", "--one-thread"],
 			getDefaultValue: () => false,
 			description: "Use only one thread");
 
 		var rawFlag = new Option<bool>(
-			aliases: new[] { "-r", "--raw" },
+			aliases: ["-r", "--raw"],
 			getDefaultValue: () => false,
 			description: "Raw output, for piping");
 
 		var firstonlyFlag = new Option<bool>(
-			aliases: new[] { "-f", "--first-only" },
+			aliases: ["-f", "--first-only"],
 			getDefaultValue: () => false,
 			description: "Only show files in A missing in B");
 

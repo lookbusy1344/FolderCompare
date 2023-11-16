@@ -7,7 +7,7 @@
 
 This project is implemented in two languages, Rust and C#. It was written to compare the performance of the two languages, and to explore their comparative ergonomics.
 
-The two implementations are in `/CSharp` implemented in .NET 7 C#, and `/Rust` in Rust 1.72 (August 2023). Both have almost identical behaviour. See below for benchmarks.
+The two implementations are in `/CSharp` implemented in .NET 8 C#, and `/Rust` in Rust 1.73 (October 2023). Both have almost identical behaviour. See below for benchmarks.
 
 Both were developed on Windows, but should work on Linux and Mac.
 

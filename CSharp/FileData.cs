@@ -12,29 +12,19 @@ public enum ComparisonType
 	Hash
 }
 
-public class CliOptions
+public class CliOptions(DirectoryInfo? folderA, DirectoryInfo? folderB, ComparisonType compare, bool oneThread, bool raw, bool firstOnly)
 {
-	public DirectoryInfo? FolderA { get; init; }
+	public DirectoryInfo? FolderA { get; init; } = folderA;
 
-	public DirectoryInfo? FolderB { get; init; }
+	public DirectoryInfo? FolderB { get; init; } = folderB;
 
-	public ComparisonType Compare { get; init; }
+	public ComparisonType Compare { get; init; } = compare;
 
-	public bool OneThread { get; init; }
+	public bool OneThread { get; init; } = oneThread;
 
-	public bool Raw { get; init; }
+	public bool Raw { get; init; } = raw;
 
-	public bool FirstOnly { get; init; }
-
-	public CliOptions(DirectoryInfo? folderA, DirectoryInfo? folderB, ComparisonType compare, bool oneThread, bool raw, bool firstOnly)
-	{
-		FolderA = folderA;
-		FolderB = folderB;
-		Compare = compare;
-		OneThread = oneThread;
-		Raw = raw;
-		FirstOnly = firstOnly;
-	}
+	public bool FirstOnly { get; init; } = firstOnly;
 }
 
 /// <summary>
