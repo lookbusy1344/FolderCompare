@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace FolderCompare;
@@ -8,20 +9,27 @@ internal static class HashUtils
 	/// <summary>
 	/// Wrapper around TryWriteBytes that throws an exception if it fails, for uint
 	/// </summary>
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void WriteBytes(Span<byte> destination, uint value)
 	{
 		if (!BitConverter.TryWriteBytes(destination, value))
-			throw new InvalidOperationException("Could not write bytes.");
+			ThrowError();
 	}
 
 	/// <summary>
 	/// Wrapper around TryWriteBytes that throws an exception if it fails, for ulong
 	/// </summary>
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void WriteBytes(Span<byte> destination, ulong value)
 	{
 		if (!BitConverter.TryWriteBytes(destination, value))
-			throw new InvalidOperationException("Could not write bytes.");
+			ThrowError();
 	}
+
+	/// <summary>
+	/// An optimising routine to improving inlining of BitConverter.TryWriteBytes
+	/// </summary>
+	private static void ThrowError() => throw new InvalidOperationException("Could not write bytes to span");
 }
 
 /// <summary>
@@ -140,7 +148,7 @@ public static class ByteUtils
 	/// <summary>
 	/// High performance routine to turn UTF-16 char into UTF-8 bytes (1-3 bytes in a tuple)
 	/// </summary>
-	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static (byte, byte, byte) CharToUtf8(char c)
 	{
 		// a single utf-8 byte
