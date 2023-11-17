@@ -65,50 +65,32 @@ public readonly record struct Sha1Value
 	/// </summary>
 	public Sha1Value(uint a, uint b, uint c, uint d, uint e)
 	{
-		Span<byte> bytes = stackalloc byte[Size];
+		// need to cast to byte span to be able to write to it, cannot Slice an inline array in .NET 8
+		Span<byte> bytes = val;
 
 		HashUtils.WriteBytes(bytes, a);
 		HashUtils.WriteBytes(bytes.Slice(4, 4), b);
 		HashUtils.WriteBytes(bytes.Slice(8, 4), c);
 		HashUtils.WriteBytes(bytes.Slice(12, 4), d);
 		HashUtils.WriteBytes(bytes.Slice(16, 4), e);
-
-		bytes.CopyTo(val);
 	}
 #endif
 
 	/// <summary>
-	/// Turn the Sha2Value into a byte array
+	/// Turn the hash into a heap allocated byte array
 	/// </summary>
-	public byte[] ToBytes()
-	{
-		var bytes = new byte[Size];
-
-		ReadOnlySpan<byte> src = val;
-		src.CopyTo(bytes);
-
-		return bytes;
-	}
+	public byte[] ToBytes() => ((ReadOnlySpan<byte>)val).ToArray();
 
 	/// <summary>
-	/// Turn the Sha2Value into a byte array, without allocating a new array
+	/// Write the hash into a byte span
 	/// </summary>
-	public void ToBytes(Span<byte> bytes)
-	{
-		//if (bytes.Length != Size)
-		//	throw new ArgumentException("The byte span must contain exactly 32 bytes.", nameof(bytes));
-
-		ReadOnlySpan<byte> src = val;
-		src.CopyTo(bytes);
-	}
+	public void ToBytes(Span<byte> bytes) => ((ReadOnlySpan<byte>)val).CopyTo(bytes);
 
 	public override string ToString()
 	{
-		Span<byte> buff = stackalloc byte[Size];
 		var builder = new StringBuilder(Size * 2);
 
-		ToBytes(buff);
-		foreach (var b in buff)
+		foreach (var b in val)
 			_ = builder.AppendFormat("{0:x2}", b);
 
 		return builder.ToString();
