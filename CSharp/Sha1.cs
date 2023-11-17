@@ -22,7 +22,7 @@ public readonly record struct Sha1Value
 	/// <summary>
 	/// Empty value, all 0 bytes
 	/// </summary>
-	public static readonly Sha2Value Empty;
+	public static readonly Sha1Value Empty;
 
 	/// <summary>
 	/// Size in bytes of the hash
@@ -49,7 +49,7 @@ public readonly record struct Sha1Value
 	public override readonly int GetHashCode() => HashCode.Combine(val[0], val[2], val[10], val[14], val[18], val[19]);
 
 	/// <summary>
-	/// construct SHA2 value from a byte span
+	/// construct SHA1 value from a byte span
 	/// </summary>
 	public Sha1Value(ReadOnlySpan<byte> bytes)
 	{
