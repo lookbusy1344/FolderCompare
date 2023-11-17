@@ -3,22 +3,22 @@
 namespace FolderCompare;
 
 /// <summary>
-/// A struct containing an inline array of 32 bytes, large enough for a SHA2 hash
-/// </summary>
-#pragma warning disable CA1815, IDE0051, IDE0044    // warnings related to inline arrays, nothing significant                                                             
-[System.Runtime.CompilerServices.InlineArray(Sha2Value.Size)]
-internal struct InnerSha2
-{
-	private byte _element0;
-}
-#pragma warning restore CA1815, IDE0051, IDE0044
-
-/// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("{this.ToString()}")]
 public readonly record struct Sha2Value
 {
+#pragma warning disable CA1815, IDE0051, IDE0044    // warnings related to inline arrays, nothing significant                                                             
+	/// <summary>
+	/// A struct containing an inline array of 32 bytes, large enough for a SHA2 hash
+	/// </summary>
+	[System.Runtime.CompilerServices.InlineArray(Sha2Value.Size)]
+	private struct InnerSha2
+	{
+		private byte _element0;
+	}
+#pragma warning restore CA1815, IDE0051, IDE0044
+
 	/// <summary>
 	/// Empty value: 32 x 0 bytes
 	/// </summary>
