@@ -12,7 +12,7 @@ public readonly record struct Sha2Value
 	/// <summary>
 	/// A struct containing an inline array of 32 bytes, large enough for a SHA2 hash
 	/// </summary>
-	[System.Runtime.CompilerServices.InlineArray(Sha2Value.Size)]
+	[System.Runtime.CompilerServices.InlineArray(Size)]
 	private struct InnerSha2
 	{
 		private byte _element0;
