@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -28,7 +29,9 @@ internal static class HashUtils
 
 	/// <summary>
 	/// An optimising routine to improving inlining of BitConverter.TryWriteBytes
+	/// Framework Design Guidelines sec 7.1, page 259
 	/// </summary>
+	[DoesNotReturn]
 	private static void ThrowError() => throw new InvalidOperationException("Could not write bytes to span");
 }
 
@@ -143,52 +146,59 @@ public static class HashBuilder
 	}
 }
 
-public static class ByteUtils
-{
-	/// <summary>
-	/// High performance routine to turn UTF-16 char into UTF-8 bytes (1-3 bytes in a tuple)
-	/// </summary>
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static (byte, byte, byte) CharToUtf8(char c)
-	{
-		// a single utf-8 byte
-		if (c <= 0x7f)
-			return ((byte)c, 0, 0);
+//public static class ByteUtils
+//{
+//	/// <summary>
+//	/// High performance routine to turn UTF-16 char into UTF-8 bytes (1-3 bytes in a tuple)
+//	/// </summary>
+//	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+//	public static (byte, byte, byte) CharToUtf8(char c)
+//	{
+//		// a single utf-8 byte
+//		if (c <= 0x7f)
+//			return ((byte)c, 0, 0);
 
-		// two utf-8 bytes
-		if (c <= 0x7ff)
-			return ((byte)(0xc0 | (c >> 6)),
-				(byte)(0x80 | (c & 0x3f)),
-				0);
+//		// two utf-8 bytes
+//		if (c <= 0x7ff)
+//			return ((byte)(0xc0 | (c >> 6)),
+//				(byte)(0x80 | (c & 0x3f)),
+//				0);
 
-		// three utf-8 bytes
-		return ((byte)(0xe0 | (c >> 12)),
-			(byte)(0x80 | ((c >> 6) & 0x3f)),
-			(byte)(0x80 | (c & 0x3f)));
-	}
+//		// three utf-8 bytes
+//		return ((byte)(0xe0 | (c >> 12)),
+//			(byte)(0x80 | ((c >> 6) & 0x3f)),
+//			(byte)(0x80 | (c & 0x3f)));
+//	}
 
-	///// <summary>
-	///// Convert a span of chars into a span of UTF8 encoded bytes.
-	///// Resulting span must be pre-allocated to be at least input.Length * 3 bytes
-	///// </summary>
-	//public static int CharSpanToUtf8Span(ReadOnlySpan<char> input, ref Span<byte> result)
-	//{
-	//	// each char can be 1-3 bytes
-	//	if (result.Length < input.Length * 3)
-	//		throw new Exception("Output buffer is too small");
+//	/// <summary>
+//	/// Convert a span of chars into a span of UTF8 encoded bytes.
+//	/// Resulting span must be pre-allocated to be at least input.Length * 3 bytes
+//	/// </summary>
+//	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+//	public static int CharSpanToUtf8Span(ReadOnlySpan<char> input, Span<byte> result)
+//	{
+//		// each char can be 1-3 bytes
+//		if (result.Length < input.Length * 3) ThrowError();
 
-	//	var p = 0;
-	//	for (var i = 0; i < input.Length; i++)
-	//	{
-	//		var (b1, b2, b3) = CharToUtf8(input[i]);
-	//		result[p++] = b1;
+//		var p = 0;
+//		for (var i = 0; i < input.Length; i++)
+//		{
+//			var (b1, b2, b3) = CharToUtf8(input[i]);
+//			result[p++] = b1;
 
-	//		if (b2 != 0)
-	//			result[p++] = b2;
-	//		if (b3 != 0)
-	//			result[p++] = b3;
-	//	}
+//			if (b2 != 0)
+//				result[p++] = b2;
+//			if (b3 != 0)
+//				result[p++] = b3;
+//		}
 
-	//	return p;
-	//}
-}
+//		return p;
+//	}
+
+//	/// <summary>
+//	/// An optimising routine to improving inlining of CharSpanToUtf8Span
+//	/// Framework Design Guidelines sec 7.1, page 259
+//	/// </summary>
+//	[DoesNotReturn]
+//	private static void ThrowError() => throw new Exception("Output buffer is too small");
+//}
