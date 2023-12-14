@@ -7,7 +7,7 @@
 
 This project is implemented in two languages, Rust and C#. It was written to compare the performance of the two languages, and to explore their comparative ergonomics.
 
-The two implementations are in `/CSharp` implemented in .NET 8 C#, and `/Rust` in Rust 1.73 (October 2023). Both have almost identical behaviour. See below for benchmarks.
+The two implementations are in `/CSharp` implemented in .NET 8 C#, and `/Rust` in Rust 1.74.1 (December 2023). Both have almost identical behaviour. See below for benchmarks.
 
 Both were developed on Windows, but should work on Linux and Mac.
 
@@ -66,18 +66,18 @@ This does mean that `FileData<a>` isn't type compatible with `FileData<b>`, whic
 
 ## Benchmarks
 
-Benchmarks from Hyperfine, run on a wheezy old laptop. Code from ver 1.0.3 (d75783c276c6e55d). The C# version is compiled to a native binary, to improve startup speed. All times in milliseconds (lower is better). Test folders have 800-1200 file differences.
+Benchmarks from Hyperfine, run on a wheezy old laptop. Code from ver 1.0.6 (8a7eb6c2b949615ec77). The C# version is compiled to a native binary, to improve startup speed. All times in milliseconds (lower is better). Test folders have 800-1200 file differences.
 
 | Benchmark      | Rust single-thread   | C# single-thread  | Difference  | Rust parallel | C# parallel | Difference |
 | ----------- | -----------   | -----------  | ----------- | -----------     | ----------- | --------- |          
-| Comparing by name | 80 | 77 |	x0.97 (dead-heat)	                    |	    64	|    87   |	x1.28 |
-| Second run		| 78 | 77 |		                                    |	    66	|    78   | |
-| Comparing by hash | 3840 | 4410 |	x1.13                               |      2738 |   3106  |	x1.13 |
-| Second run	    | 3785 | 4271 |                                     |		2700 |   3050  | |
+| Comparing by name | 61 | 65 |	x1.03 (dead-heat)	                    |	    49	|    70   |	x1.4 |
+| Second run		| 65 | 65 |		                                    |	    50	|    71   | |
+| Comparing by hash | 1808 | 1994 |	x1.1                                |      1253 |   1390  |	x1.12 |
+| Second run	    | 1801 | 1974 |                                     |	  1246  |   1410  | |
 
 Hashing is obviously more expensive than comparison by filename. The parallel code is around 30% faster than single-threaded (a maximum of 2 threads are used, and only for the folder enumeration and hashing).
 
-The C# code performs suprisingly well (only 13% slower than Rust for the heavier workload of hashing, and 28% slower for name comparison). This was improved by switching to 'NativeAOT' compilation (building a native binary with no JIT).
+The C# code performs suprisingly well, only 112% of Rust speed for the heavier workload of hashing. This is impressive given Rust's higher cognative load.
 
 ## C# Publishing
 
