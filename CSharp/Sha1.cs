@@ -30,7 +30,7 @@ public readonly record struct Sha1Value
 	public const int Size = 20;
 
 	/// <summary>
-	/// The inline array of 32 bytes
+	/// The inline array of 20 bytes
 	/// </summary>
 	private readonly InnerSha1 val;
 
