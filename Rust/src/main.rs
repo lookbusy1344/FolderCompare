@@ -12,6 +12,7 @@ use std::path::Path;
 use utils::*;
 use walkdir::WalkDir;
 
+mod customhashset;
 mod filedata;
 mod utils;
 
