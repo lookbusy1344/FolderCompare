@@ -103,42 +103,44 @@ where
     /// Length of hash set
     #[inline]
     pub fn len(&self) -> usize {
-        self.buckets.iter().map(|bucket| bucket.len()).sum()
+        self.buckets.iter().map(std::vec::Vec::len).sum()
     }
 
     /// Check if hash set is empty
     #[inline]
     pub fn is_empty(&self) -> bool {
-        self.buckets.iter().all(|bucket| bucket.is_empty())
+        self.buckets.iter().all(std::vec::Vec::is_empty)
     }
 
     /// Clear the hash set
     pub fn clear(&mut self) {
-        self.buckets.iter_mut().for_each(|bucket| bucket.clear());
+        self.buckets.iter_mut().for_each(std::vec::Vec::clear);
     }
 
+    // ==== DIAGNOSTICS =========================================================================
+
     /// Get a reference to the buckets
-    #[cfg(debug_assertions)]
+    //#[cfg(debug_assertions)]
     pub fn get_buckets(&self) -> &Vec<Vec<T>> {
         &self.buckets
     }
 
     /// Get the largest current bucket size
-    #[cfg(debug_assertions)]
+    //#[cfg(debug_assertions)]
     pub fn largest_bucket_size(&self) -> usize {
         self.buckets
             .iter()
-            .map(|bucket| bucket.len())
+            .map(std::vec::Vec::len)
             .max()
             .unwrap_or(0)
     }
 
     /// Get the smallest current bucket size
-    #[cfg(debug_assertions)]
+    //#[cfg(debug_assertions)]
     pub fn smallest_bucket_size(&self) -> usize {
         self.buckets
             .iter()
-            .map(|bucket| bucket.len())
+            .map(std::vec::Vec::len)
             .min()
             .unwrap_or(0)
     }
@@ -146,6 +148,7 @@ where
 
 /// Helper to get the hash of a single value (including tuples)
 #[inline]
+#[allow(clippy::cast_possible_truncation)]
 pub fn get_hash<T: Hash>(t: &T) -> usize {
     // get_hash("hello")
     // get_hash(&("hello", 99))
