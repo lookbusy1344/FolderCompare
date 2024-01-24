@@ -9,6 +9,9 @@ use crate::parse_comparer;
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=+"]);
+const DEFAULT_BUCKETS: usize = 1000;
+const MIN_BUCKETS: usize = 50;
+const FILE_BUFFER_SIZE: usize = 4096;
 
 pub const HELP: &str = "\
 USAGE:
@@ -20,14 +23,13 @@ MANDATORY PARAMETERS:
 
 OPTIONS:
     -c, --comparison [value]     Comparison to use.
+    -u, --buckets [value]        Number of buckets to use for hashsets (default 1000)
     -r, --raw                    Raw output, for piping
     -o, --one-thread             Only use one thread, don't scan folders in parallel
     -f, --first-only             Only show files in folder A missing from folder B (default is both)
     
 Comparison can be:
     Name, NameSize or Hash. Default is Name.";
-
-const BUFFER_SIZE: usize = 4096;
 
 /// Configuration for the program, wrapper around various options
 pub struct Config {
@@ -37,6 +39,7 @@ pub struct Config {
     pub raw: bool,                       // raw output, for piping
     pub firstonly: bool, // only show files in folder A missing from folder B (default is both)
     pub onethread: bool, // only use one thread, don't scan folders in parallel
+    pub buckets: usize,  // number of buckets, this is fixed once hashsets is created
 }
 
 /// Hash a file using the given hasher as a Digest implementation
@@ -46,7 +49,7 @@ pub struct Config {
 pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<Sha2Value> {
     let file = File::open(filename)?;
     let mut reader = BufReader::new(file);
-    let mut buffer = [0u8; BUFFER_SIZE];
+    let mut buffer = [0u8; FILE_BUFFER_SIZE];
 
     let mut hasher = D::new();
     loop {
@@ -92,13 +95,16 @@ pub fn parse_args() -> anyhow::Result<Config> {
 
     if pargs.contains(["-h", "--help"]) {
         println!("{HELP}");
-        return Err(anyhow::anyhow!(""));
+        return Err(anyhow::anyhow!("Exiting early"));
     }
 
     let path1: String = pargs.value_from_str(["-a", "--foldera"])?;
     let path2: String = pargs.value_from_str(["-b", "--folderb"])?;
     let compstr: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
+    let buckets: Option<usize> = pargs.opt_value_from_str(["-u", "--buckets"])?;
     let compareropt = parse_comparer(&compstr);
+
+    // additional validation
 
     if compareropt.is_err() {
         return Err(anyhow::anyhow!(
@@ -106,28 +112,31 @@ pub fn parse_args() -> anyhow::Result<Config> {
         ));
     }
 
+    if let Some(b) = buckets {
+        if b < MIN_BUCKETS || b > 100_000 {
+            return Err(anyhow::anyhow!(
+                "Number of buckets should be at least {}",
+                MIN_BUCKETS
+            ));
+        }
+    }
     // package the config options, so they can be easily passed around
+
     let config = Config {
         folder1: Path::new(&path1).canonicalize()?,
         folder2: Path::new(&path2).canonicalize()?,
         comparer: compareropt.unwrap(),
+        buckets: buckets.unwrap_or(DEFAULT_BUCKETS),
         raw,
         firstonly: pargs.contains(["-f", "--first-only"]),
         onethread: pargs.contains(["-o", "--one-thread"]),
     };
 
     // Check for unused arguments, and error out if there are any
-    args_finished(pargs)?;
+    let unused = pargs.finish();
+    if !unused.is_empty() {
+        return Err(anyhow::anyhow!("Unused arguments: {:?}", unused));
+    }
 
     Ok(config)
-}
-
-/// Check for unused arguments, and error out if there are any
-fn args_finished(args: pico_args::Arguments) -> anyhow::Result<()> {
-    let unused = args.finish();
-    if unused.is_empty() {
-        Ok(())
-    } else {
-        Err(anyhow::anyhow!("Unused arguments: {:?}", unused))
-    }
 }

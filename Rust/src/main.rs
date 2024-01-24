@@ -14,7 +14,6 @@ mod customhashset;
 mod filedata;
 mod utils;
 
-const BUCKETS_REQUIRED: usize = 1000usize; // number of buckets, this is fixed
 const DEFAULT_BUCKET_SIZE: usize = 30usize; // default size of each bucket, these can expand
 
 fn main() -> anyhow::Result<()> {
@@ -84,15 +83,15 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
         println!("{count} difference(s) found");
 
         // *** hashset stats ***
-        let lbs1 = files1.largest_bucket_size();
-        let lbs2 = files2.largest_bucket_size();
-        let empty1 = files1.empty_buckets();
-        let empty2 = files2.empty_buckets();
-        let size1 = files1.len();
-        let size2 = files2.len();
+        // let lbs1 = files1.largest_bucket_size();
+        // let lbs2 = files2.largest_bucket_size();
+        // let empty1 = files1.empty_buckets();
+        // let empty2 = files2.empty_buckets();
+        // let size1 = files1.len();
+        // let size2 = files2.len();
 
-        println!("Folder1: {size1} files, largest bucket size {lbs1}, empty buckets {empty1}");
-        println!("Folder2: {size2} files, largest bucket size {lbs2}, empty buckets {empty2}");
+        // println!("Folder1: {size1} files, largest bucket size {lbs1}, empty buckets {empty1}");
+        // println!("Folder2: {size2} files, largest bucket size {lbs2}, empty buckets {empty2}");
     }
 
     Ok(())
@@ -120,7 +119,7 @@ fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: 
 
 /// Scan a folder and build hashset with the files
 fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<FileData>> {
-    let mut fileset = make_hashset(config.comparer);
+    let mut fileset = make_hashset(config.comparer, config.buckets);
     let needs_hash = config.comparer == FileDataCompareOption::Hash;
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
@@ -146,25 +145,19 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<File
 }
 
 /// Make a hashset with the given comparison lambdas
-fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData> {
+fn make_hashset(option: FileDataCompareOption, buckets: usize) -> CustomHashSet<FileData> {
     match option {
-        FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
-            eq_filename,
-            hash_filename,
-            BUCKETS_REQUIRED,
-            DEFAULT_BUCKET_SIZE,
-        ),
+        FileDataCompareOption::Name => {
+            CustomHashSet::<FileData>::new(eq_filename, hash_filename, buckets, DEFAULT_BUCKET_SIZE)
+        }
         FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
             eq_filename_size,
             hash_filename_size,
-            BUCKETS_REQUIRED,
+            buckets,
             DEFAULT_BUCKET_SIZE,
         ),
-        FileDataCompareOption::Hash => CustomHashSet::<FileData>::new(
-            eq_sha2,
-            hash_sha2,
-            BUCKETS_REQUIRED,
-            DEFAULT_BUCKET_SIZE,
-        ),
+        FileDataCompareOption::Hash => {
+            CustomHashSet::<FileData>::new(eq_sha2, hash_sha2, buckets, DEFAULT_BUCKET_SIZE)
+        }
     }
 }
