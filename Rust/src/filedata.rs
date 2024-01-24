@@ -41,16 +41,10 @@ impl Sha2Value {
     // }
 
     /// for hashing
+    #[inline]
     pub fn to_usize(&self) -> usize {
         let (int_bytes, _) = self.hash.split_at(std::mem::size_of::<usize>());
-        #[cfg(target_pointer_width = "64")]
-        {
-            u64::from_be_bytes(int_bytes.try_into().unwrap()) as usize
-        }
-        #[cfg(target_pointer_width = "32")]
-        {
-            u32::from_be_bytes(int_bytes.try_into().unwrap()) as usize
-        }
+        usize::from_be_bytes(int_bytes.try_into().unwrap())
     }
 }
 
