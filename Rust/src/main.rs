@@ -2,6 +2,7 @@
 //#![allow(dead_code)]
 //#![allow(unused_variables)]
 
+use customhashset::CustomHashSet;
 #[allow(clippy::wildcard_imports)]
 use filedata::*;
 use std::collections::HashSet;
@@ -173,6 +174,30 @@ where
 {
     let mut fileset: HashSet<FileData<U>> = HashSet::with_capacity(200);
 
+    for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
+        if entry.file_type().is_file() {
+            let fname = entry.file_name().to_str().unwrap().to_string();
+            let fpath = entry.path().to_str().unwrap().to_string();
+            let fsize = entry.metadata().unwrap().len();
+
+            fileset.insert(FileData::<U> {
+                filename: fname,
+                size: fsize,
+                hash: if comparer == FileDataCompareOption::Hash {
+                    hash_file::<sha2::Sha256>(fpath.as_str())?
+                } else {
+                    Sha2Value::default()
+                },
+                path: fpath, // needs to come after hash because it consumes fpath
+                phantom: PhantomData,
+            });
+        }
+    }
+
+    Ok(fileset)
+}
+
+fn scan_folder2(dir: &Path, fileset: &mut CustomHashSet<FileData2>) -> anyhow::Result<()> {
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
             let fname = entry.file_name().to_str().unwrap().to_string();

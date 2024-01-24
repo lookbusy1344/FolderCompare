@@ -52,6 +52,13 @@ pub enum FileDataCompareOption {
 
 // Implementations for FileData and the various comparison options
 
+pub struct FileData2 {
+    pub filename: String,
+    pub path: String,
+    pub size: u64,
+    pub hash: Sha2Value,
+}
+
 /// Represents a file, with name, pathname, size and optional hash. U is the type of comparison
 pub struct FileData<U> {
     pub filename: String,
