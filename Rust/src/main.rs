@@ -119,8 +119,8 @@ fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: 
 
 /// Scan a folder and build hashset with the files
 fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<FileData>> {
-    let mut fileset = make_hashset(config.comparer, config.buckets);
-    let needs_hash = config.comparer == FileDataCompareOption::Hash;
+    let mut fileset = make_hashset(config);
+    let include_sha2 = config.comparer == FileDataCompareOption::Hash;
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
@@ -131,7 +131,7 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<File
             fileset.insert(FileData {
                 filename: fname,
                 size: fsize,
-                hash: if needs_hash {
+                hash: if include_sha2 {
                     hash_file::<sha2::Sha256>(fpath.as_str())?
                 } else {
                     Sha2Value::default()
@@ -145,19 +145,22 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<File
 }
 
 /// Make a hashset with the given comparison lambdas
-fn make_hashset(option: FileDataCompareOption, buckets: usize) -> CustomHashSet<FileData> {
-    match option {
-        FileDataCompareOption::Name => {
-            CustomHashSet::<FileData>::new(eq_filename, hash_filename, buckets, DEFAULT_BUCKET_SIZE)
-        }
+fn make_hashset(config: &Config) -> CustomHashSet<FileData> {
+    match config.comparer {
+        FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
+            eq_filename,
+            hash_filename,
+            config.buckets,
+            DEFAULT_BUCKET_SIZE,
+        ),
         FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
             eq_filename_size,
             hash_filename_size,
-            buckets,
+            config.buckets,
             DEFAULT_BUCKET_SIZE,
         ),
         FileDataCompareOption::Hash => {
-            CustomHashSet::<FileData>::new(eq_sha2, hash_sha2, buckets, DEFAULT_BUCKET_SIZE)
+            CustomHashSet::<FileData>::new(eq_sha2, hash_sha2, config.buckets, DEFAULT_BUCKET_SIZE)
         }
     }
 }

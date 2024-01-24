@@ -113,7 +113,7 @@ pub fn parse_args() -> anyhow::Result<Config> {
     }
 
     if let Some(b) = buckets {
-        if b < MIN_BUCKETS || b > 100_000 {
+        if !(MIN_BUCKETS..=100_000).contains(&b) {
             return Err(anyhow::anyhow!(
                 "Number of buckets should be at least {}",
                 MIN_BUCKETS
