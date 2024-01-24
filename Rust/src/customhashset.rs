@@ -100,6 +100,25 @@ where
         }
     }
 
+    /// Find the the values that are in self but not in other
+    pub fn difference(&self, other: &Self) -> Vec<&T> {
+        let mut diff = Vec::with_capacity(100);
+        for bucket in &self.buckets {
+            for item in bucket {
+                if !other.contains(item) {
+                    diff.push(item);
+                }
+            }
+        }
+        diff
+    }
+
+    /// Iterate over the hash set
+    #[inline]
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.buckets.iter().flatten()
+    }
+
     /// Length of hash set
     #[inline]
     pub fn len(&self) -> usize {
