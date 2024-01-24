@@ -5,27 +5,30 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+// types for equality and hash functions
+pub type EqualityFn<T> = dyn Fn(&T, &T) -> bool;
+pub type HashFn<T> = dyn Fn(&T) -> usize;
+
 /// A simple custom hash set that takes two lambda expressions for equality and hashing
-pub struct CustomHashSet<T, E, H> {
+pub struct CustomHashSet<T> {
     /// use a vector of vectors as the underlying data structure
     buckets: Vec<Vec<T>>,
     /// store the capacity of the buckets
     buckets_required: usize,
     /// store the equality function as a field
-    eq_fn: E,
+    eq_fn: Box<EqualityFn<T>>,
     /// store the hash function as a field
-    hash_fn: H,
+    hash_fn: Box<HashFn<T>>,
 }
 
-impl<T, E, H> CustomHashSet<T, E, H>
-where
-    // constrain the equality type to be a function that takes two references to T and returns a bool
-    E: Fn(&T, &T) -> bool,
-    // constrain the hash type to be a function that takes a reference to T and returns a u64
-    H: Fn(&T) -> usize,
-{
+impl<T> CustomHashSet<T> {
     // Create a new CustomHashSet with the given equality and hash functions and an initial capacity
-    pub fn new(eq_fn: E, hash_fn: H, buckets_required: usize, default_bucket_size: usize) -> Self {
+    pub fn new(
+        eq_fn: Box<EqualityFn<T>>,
+        hash_fn: Box<HashFn<T>>,
+        buckets_required: usize,
+        default_bucket_size: usize,
+    ) -> Self {
         // create a vector of empty vectors with the given capacity
         let buckets = create_buckets(buckets_required, default_bucket_size);
 
