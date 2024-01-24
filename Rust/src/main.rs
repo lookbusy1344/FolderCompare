@@ -15,45 +15,8 @@ mod filedata;
 mod utils;
 
 fn main() -> anyhow::Result<()> {
-    let mut pargs = pico_args::Arguments::from_env();
-    let raw = pargs.contains(["-r", "--raw"]);
-    if !raw {
-        println!(
-            "Folder_comparer Rust, ver: {}, commit: {}",
-            VERSION.unwrap_or("?"),
-            GIT_VERSION
-        );
-        println!();
-    }
-
-    if pargs.contains(["-h", "--help"]) {
-        println!("{HELP}");
-        return Ok(());
-    }
-
-    let path1: String = pargs.value_from_str(["-a", "--foldera"])?;
-    let path2: String = pargs.value_from_str(["-b", "--folderb"])?;
-    let compstr: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
-    let compareropt = parse_comparer(&compstr);
-
-    if compareropt.is_err() {
-        return Err(anyhow::anyhow!(
-            "Comparison should be Name, NameSize or Hash"
-        ));
-    }
-
-    // package the config options, so they can be easily passed around
-    let config = Config {
-        folder1: Path::new(&path1).canonicalize()?,
-        folder2: Path::new(&path2).canonicalize()?,
-        comparer: compareropt.unwrap(),
-        raw,
-        firstonly: pargs.contains(["-f", "--first-only"]),
-        onethread: pargs.contains(["-o", "--one-thread"]),
-    };
-
-    // Check for unused arguments, and error out if there are any
-    args_finished(pargs)?;
+    // parse the command line arguments
+    let config = parse_args()?;
 
     // comparing a folder with itself is pointless
     if config.folder1 == config.folder2 {
@@ -132,7 +95,7 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
 }
 
 /// Show the results of the comparison
-fn show_results(differences: &Vec<&FileData2>, presentindir: &Path, absentindir: &Path, raw: bool) {
+fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: &Path, raw: bool) {
     if !raw {
         println!(
             "Files in '{}' but not in '{}'",
@@ -155,7 +118,7 @@ fn show_results(differences: &Vec<&FileData2>, presentindir: &Path, absentindir:
 fn scan_folder(
     dir: &Path,
     needs_hash: bool,
-    fileset: &mut CustomHashSet<FileData2>,
+    fileset: &mut CustomHashSet<FileData>,
 ) -> anyhow::Result<()> {
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
@@ -163,7 +126,7 @@ fn scan_folder(
             let fpath = entry.path().to_str().unwrap().to_string();
             let fsize = entry.metadata().unwrap().len();
 
-            fileset.insert(FileData2 {
+            fileset.insert(FileData {
                 filename: fname,
                 size: fsize,
                 hash: if needs_hash {
@@ -180,27 +143,27 @@ fn scan_folder(
 }
 
 /// Make a hashset with the given comparison lambdas
-fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData2> {
+fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData> {
     // *** This can probably be improved by using functions instead of closures
     let buckets_required = 100usize;
     let default_bucket_size = 100usize;
 
     match option {
-        FileDataCompareOption::Name => CustomHashSet::<FileData2>::new(
-            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename),
-            Box::new(|x: &FileData2| get_hash(&x.filename)),
+        FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
+            Box::new(|a: &FileData, b: &FileData| a.filename == b.filename),
+            Box::new(|x: &FileData| get_hash(&x.filename)),
             buckets_required,
             default_bucket_size,
         ),
-        FileDataCompareOption::NameSize => CustomHashSet::<FileData2>::new(
-            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename && a.size == b.size),
-            Box::new(|x: &FileData2| get_hash(&(&x.filename, x.size))),
+        FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
+            Box::new(|a: &FileData, b: &FileData| a.filename == b.filename && a.size == b.size),
+            Box::new(|x: &FileData| get_hash(&(&x.filename, x.size))),
             buckets_required,
             default_bucket_size,
         ),
-        FileDataCompareOption::Hash => CustomHashSet::<FileData2>::new(
-            Box::new(|a: &FileData2, b: &FileData2| a.hash == b.hash),
-            Box::new(|x: &FileData2| x.hash.to_usize()),
+        FileDataCompareOption::Hash => CustomHashSet::<FileData>::new(
+            Box::new(|a: &FileData, b: &FileData| a.hash == b.hash),
+            Box::new(|x: &FileData| x.hash.to_usize()),
             //Box::new(|x: &FileData2| get_hash(&x.hash)),
             buckets_required,
             default_bucket_size,
