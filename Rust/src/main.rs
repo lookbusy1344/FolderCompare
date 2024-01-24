@@ -5,9 +5,6 @@
 use customhashset::{get_hash, CustomHashSet};
 #[allow(clippy::wildcard_imports)]
 use filedata::*;
-use std::collections::HashSet;
-use std::hash::Hash;
-use std::marker::PhantomData;
 use std::path::Path;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
@@ -73,19 +70,7 @@ fn main() -> anyhow::Result<()> {
         println!();
     }
 
-    // call the appropriate comparison function
-    // this is a bit ugly but HashSet doesnt have pluggable comparers
-    match config.comparer {
-        FileDataCompareOption::Name => {
-            scan_and_check::<UniqueName>(&config)?;
-        }
-        FileDataCompareOption::NameSize => {
-            scan_and_check::<UniqueNameSize>(&config)?;
-        }
-        FileDataCompareOption::Hash => {
-            scan_and_check::<UniqueHash>(&config)?;
-        }
-    }
+    scan_and_check(&config)?;
 
     Ok(())
 }
@@ -104,15 +89,22 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
         scan_folder(&config.folder1, needshash, &mut files1)?;
         scan_folder(&config.folder2, needshash, &mut files2)?;
     } else {
+        // scan them in parallel
         panic!("Not implemented");
-        // // scan them in parallel
+        // *** the error here can probably be fixed by using function pointers for eq and hash
         // let (resfiles1, resfiles2) = rayon::join(
-        //     || scan_folder::<U>(&config.folder1, config.comparer),
-        //     || scan_folder::<U>(&config.folder2, config.comparer),
+        //     || {
+        //         scan_folder(&config.folder1, needshash, &mut files1).unwrap();
+        //         files1
+        //     },
+        //     || {
+        //         scan_folder(&config.folder2, needshash, &mut files2).unwrap();
+        //         files2
+        //     },
         // );
 
-        // files1 = resfiles1?;
-        // files2 = resfiles2?;
+        // files1 = resfiles1;
+        // files2 = resfiles2;
     }
 
     // find whats in files1, but not in files2
@@ -202,7 +194,7 @@ fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData2> {
         ),
         FileDataCompareOption::NameSize => CustomHashSet::<FileData2>::new(
             Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename && a.size == b.size),
-            Box::new(|x: &FileData2| get_hash(&(x.filename, x.size))),
+            Box::new(|x: &FileData2| get_hash(&(&x.filename, x.size))),
             buckets_required,
             default_bucket_size,
         ),
