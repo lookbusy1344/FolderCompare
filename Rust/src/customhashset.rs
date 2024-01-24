@@ -100,7 +100,7 @@ where
         }
     }
 
-    /// Find the the values that are in self but not in other. Returns a vec
+    /// Find the the values that are in self but not in other. Returns a vecto
     pub fn difference(&self, other: &Self) -> Vec<&T> {
         let mut diff = Vec::with_capacity(100);
         for item in self.iter() {
@@ -112,7 +112,12 @@ where
     }
 
     /// Find the the values that are in self but not in other. Returns an iterator
-    pub fn difference_i<'a>(&'a self, other: &'a Self) -> impl Iterator<Item = &'a T> {
+    pub fn difference_iter<'a, 'b: 'a>(
+        &'a self,
+        other: &'b Self,
+    ) -> impl Iterator<Item = &'a T> + 'a {
+        // 'b must live at least as long as 'a, because we are still walking the iterator after this 'returns'
+        // whereas the vector version returns a vector that is not dependent on the lifetime of 'b
         self.iter().filter(move |item| !other.contains(item))
     }
 
