@@ -1,6 +1,8 @@
 use std::str::FromStr;
 use strum::EnumString;
 
+use crate::customhashset::get_hash;
+
 // FileData struct and associated trait implementations
 // This struct can be used to compare files by name, name and size, or name and hash
 // According to a comparison marker struct (UniqueName, UniqueNameSize, UniqueHash)
@@ -64,4 +66,34 @@ pub struct FileData {
     pub path: String,
     pub size: u64,
     pub hash: Sha2Value,
+}
+
+// filename comparison functions
+
+pub fn eq_filename(a: &FileData, b: &FileData) -> bool {
+    a.filename == b.filename
+}
+
+pub fn hash_filename(x: &FileData) -> usize {
+    get_hash(&x.filename)
+}
+
+// filename and size comparison functions
+
+pub fn eq_filename_size(a: &FileData, b: &FileData) -> bool {
+    a.filename == b.filename && a.size == b.size
+}
+
+pub fn hash_filename_size(x: &FileData) -> usize {
+    get_hash(&(&x.filename, x.size))
+}
+
+// Sha2Value comparison functions
+
+pub fn eq_sha2(a: &FileData, b: &FileData) -> bool {
+    a.hash == b.hash
+}
+
+pub fn hash_sha2(x: &FileData) -> usize {
+    x.hash.to_usize()
 }

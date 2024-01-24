@@ -2,7 +2,7 @@
 //#![allow(dead_code)]
 //#![allow(unused_variables)]
 
-use customhashset::{get_hash, CustomHashSet};
+use customhashset::CustomHashSet;
 #[allow(clippy::wildcard_imports)]
 use filedata::*;
 use std::path::Path;
@@ -139,21 +139,20 @@ fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData> {
 
     match option {
         FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
-            Box::new(|a: &FileData, b: &FileData| a.filename == b.filename),
-            Box::new(|x: &FileData| get_hash(&x.filename)),
+            Box::new(eq_filename),
+            Box::new(hash_filename),
             buckets_required,
             default_bucket_size,
         ),
         FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
-            Box::new(|a: &FileData, b: &FileData| a.filename == b.filename && a.size == b.size),
-            Box::new(|x: &FileData| get_hash(&(&x.filename, x.size))),
+            Box::new(eq_filename_size),
+            Box::new(hash_filename_size),
             buckets_required,
             default_bucket_size,
         ),
         FileDataCompareOption::Hash => CustomHashSet::<FileData>::new(
-            Box::new(|a: &FileData, b: &FileData| a.hash == b.hash),
-            Box::new(|x: &FileData| x.hash.to_usize()),
-            //Box::new(|x: &FileData2| get_hash(&x.hash)),
+            Box::new(eq_sha2),
+            Box::new(hash_sha2),
             buckets_required,
             default_bucket_size,
         ),
