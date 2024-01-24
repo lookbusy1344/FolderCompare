@@ -2,7 +2,7 @@
 //#![allow(dead_code)]
 //#![allow(unused_variables)]
 
-use customhashset::CustomHashSet;
+use customhashset::{get_hash, CustomHashSet};
 #[allow(clippy::wildcard_imports)]
 use filedata::*;
 use std::collections::HashSet;
@@ -91,11 +91,29 @@ fn main() -> anyhow::Result<()> {
 }
 
 /// Wrapper around main scanning and comparison. Only needed because this is generic over the comparison type U
-fn scan_and_check<U>(config: &Config) -> anyhow::Result<()>
-where
-    FileData<U>: Eq + Hash, // FileData<U> must be properly comparable
-    U: UniqueTrait,         // U must be a Unique key marker
-{
+fn scan_and_check(config: &Config) -> anyhow::Result<()> {
+    // create the hashsets
+    let mut files1 = match config.comparer {
+        FileDataCompareOption::Name => CustomHashSet::<FileData2>::new(
+            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename),
+            Box::new(|x: &FileData2| get_hash(&x.filename)),
+            buckets_required,
+            default_bucket_size,
+        ),
+        FileDataCompareOption::NameSize => CustomHashSet::<FileData2>::new(
+            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename && a.size == b.size),
+            Box::new(|x: &FileData2| get_hash(&(x.filename, x.size))),
+            buckets_required,
+            default_bucket_size,
+        ),
+        FileDataCompareOption::Hash => CustomHashSet::<FileData2>::new(
+            Box::new(|a: &FileData2, b: &FileData2| a.hash == b.hash),
+            Box::new(|x: &FileData2| get_hash(&x.hash)),
+            buckets_required,
+            default_bucket_size,
+        ),
+    };
+
     // scan the folders and populate the HashSets
     let files1;
     let files2;
@@ -163,42 +181,8 @@ fn show_results<U: UniqueTrait>(
     }
 }
 
-/// Scan a folder and return a set of files
-fn scan_folder<U>(
-    dir: &Path,
-    comparer: FileDataCompareOption,
-) -> anyhow::Result<HashSet<FileData<U>>>
-where
-    FileData<U>: Eq + Hash, // FileData<U> must be properly comparable
-    U: UniqueTrait,         // U must be a Unique key marker
-{
-    let mut fileset: HashSet<FileData<U>> = HashSet::with_capacity(200);
-
-    for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
-        if entry.file_type().is_file() {
-            let fname = entry.file_name().to_str().unwrap().to_string();
-            let fpath = entry.path().to_str().unwrap().to_string();
-            let fsize = entry.metadata().unwrap().len();
-
-            fileset.insert(FileData::<U> {
-                filename: fname,
-                size: fsize,
-                hash: if comparer == FileDataCompareOption::Hash {
-                    hash_file::<sha2::Sha256>(fpath.as_str())?
-                } else {
-                    Sha2Value::default()
-                },
-                path: fpath, // needs to come after hash because it consumes fpath
-                phantom: PhantomData,
-            });
-        }
-    }
-
-    Ok(fileset)
-}
-
 /// Scan a folder and populates the given hashset with the files
-fn scan_folder2(
+fn scan_folder(
     dir: &Path,
     needs_hash: bool,
     fileset: &mut CustomHashSet<FileData2>,
@@ -223,4 +207,31 @@ fn scan_folder2(
     }
 
     Ok(())
+}
+
+/// Make a hashset with the given comparison lambdas
+fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData2> {
+    let buckets_required = 100usize;
+    let default_bucket_size = 100usize;
+
+    match option {
+        FileDataCompareOption::Name => CustomHashSet::<FileData2>::new(
+            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename),
+            Box::new(|x: &FileData2| get_hash(&x.filename)),
+            buckets_required,
+            default_bucket_size,
+        ),
+        FileDataCompareOption::NameSize => CustomHashSet::<FileData2>::new(
+            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename && a.size == b.size),
+            Box::new(|x: &FileData2| get_hash(&(x.filename, x.size))),
+            buckets_required,
+            default_bucket_size,
+        ),
+        FileDataCompareOption::Hash => CustomHashSet::<FileData2>::new(
+            Box::new(|a: &FileData2, b: &FileData2| a.hash == b.hash),
+            Box::new(|x: &FileData2| get_hash(&x.hash)),
+            buckets_required,
+            default_bucket_size,
+        ),
+    }
 }
