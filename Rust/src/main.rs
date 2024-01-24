@@ -51,21 +51,13 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
         files2 = scan_folder(&config, &config.folder2)?;
     } else {
         // scan them in parallel
-        panic!("Not implemented");
-        // *** the error here can probably be fixed by using function pointers for eq and hash
-        // let (resfiles1, resfiles2) = rayon::join(
-        //     || {
-        //         scan_folder(&config.folder1, needshash, &mut files1).unwrap();
-        //         files1
-        //     },
-        //     || {
-        //         scan_folder(&config.folder2, needshash, &mut files2).unwrap();
-        //         files2
-        //     },
-        // );
+        let (resfiles1, resfiles2) = rayon::join(
+            move || scan_folder(&config, &config.folder1),
+            move || scan_folder(&config, &config.folder2),
+        );
 
-        // files1 = resfiles1;
-        // files2 = resfiles2;
+        files1 = resfiles1?;
+        files2 = resfiles2?;
     }
 
     // find whats in files1, but not in files2
