@@ -82,6 +82,22 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
 
     if !config.raw {
         println!("{count} difference(s) found");
+
+        // *** hashset stats ***
+        let lbs1 = files1.largest_bucket_size();
+        let lbs2 = files2.largest_bucket_size();
+        let size1 = files1.len();
+        let size2 = files2.len();
+        println!(
+            "Folder1: {size1} files, largest bucket size {lbs1}",
+            size1 = size1,
+            lbs1 = lbs1
+        );
+        println!(
+            "Folder2: {size2} files, largest bucket size {lbs2}",
+            size2 = size2,
+            lbs2 = lbs2
+        );
     }
 
     Ok(())
