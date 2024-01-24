@@ -14,6 +14,9 @@ mod customhashset;
 mod filedata;
 mod utils;
 
+const BUCKETS_REQUIRED: usize = 1000usize; // number of buckets, this is fixed
+const DEFAULT_BUCKET_SIZE: usize = 100usize; // default size of each bucket, these can expand
+
 fn main() -> anyhow::Result<()> {
     // parse the command line arguments
     let config = parse_args()?;
@@ -133,27 +136,24 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<File
 
 /// Make a hashset with the given comparison lambdas
 fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData> {
-    let buckets_required = 100usize;
-    let default_bucket_size = 100usize;
-
     match option {
         FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
             eq_filename,
             hash_filename,
-            buckets_required,
-            default_bucket_size,
+            BUCKETS_REQUIRED,
+            DEFAULT_BUCKET_SIZE,
         ),
         FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
             eq_filename_size,
             hash_filename_size,
-            buckets_required,
-            default_bucket_size,
+            BUCKETS_REQUIRED,
+            DEFAULT_BUCKET_SIZE,
         ),
         FileDataCompareOption::Hash => CustomHashSet::<FileData>::new(
             eq_sha2,
             hash_sha2,
-            buckets_required,
-            default_bucket_size,
+            BUCKETS_REQUIRED,
+            DEFAULT_BUCKET_SIZE,
         ),
     }
 }
