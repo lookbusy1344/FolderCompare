@@ -15,7 +15,7 @@ mod filedata;
 mod utils;
 
 const BUCKETS_REQUIRED: usize = 1000usize; // number of buckets, this is fixed
-const DEFAULT_BUCKET_SIZE: usize = 100usize; // default size of each bucket, these can expand
+const DEFAULT_BUCKET_SIZE: usize = 30usize; // default size of each bucket, these can expand
 
 fn main() -> anyhow::Result<()> {
     // parse the command line arguments
@@ -86,18 +86,13 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
         // *** hashset stats ***
         let lbs1 = files1.largest_bucket_size();
         let lbs2 = files2.largest_bucket_size();
+        let empty1 = files1.empty_buckets();
+        let empty2 = files2.empty_buckets();
         let size1 = files1.len();
         let size2 = files2.len();
-        println!(
-            "Folder1: {size1} files, largest bucket size {lbs1}",
-            size1 = size1,
-            lbs1 = lbs1
-        );
-        println!(
-            "Folder2: {size2} files, largest bucket size {lbs2}",
-            size2 = size2,
-            lbs2 = lbs2
-        );
+
+        println!("Folder1: {size1} files, largest bucket size {lbs1}, empty buckets {empty1}");
+        println!("Folder2: {size2} files, largest bucket size {lbs2}, empty buckets {empty2}");
     }
 
     Ok(())
