@@ -41,16 +41,14 @@ fn main() -> anyhow::Result<()> {
 /// Wrapper around main scanning and comparison. Only needed because this is generic over the comparison type U
 fn scan_and_check(config: &Config) -> anyhow::Result<()> {
     // create the hashsets
-    let mut files1 = make_hashset(config.comparer);
-    let mut files2 = make_hashset(config.comparer);
-
-    let needshash = config.comparer == FileDataCompareOption::Hash;
+    let files1;
+    let files2;
 
     // scan the folders and populate the HashSets
     if config.onethread {
         // scan the two folders in series, using one thread
-        scan_folder(&config.folder1, needshash, &mut files1)?;
-        scan_folder(&config.folder2, needshash, &mut files2)?;
+        files1 = scan_folder(&config, &config.folder1)?;
+        files2 = scan_folder(&config, &config.folder2)?;
     } else {
         // scan them in parallel
         panic!("Not implemented");
@@ -114,12 +112,11 @@ fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: 
     }
 }
 
-/// Scan a folder and populates the given hashset with the files
-fn scan_folder(
-    dir: &Path,
-    needs_hash: bool,
-    fileset: &mut CustomHashSet<FileData>,
-) -> anyhow::Result<()> {
+/// Scan a folder and build hashset with the files
+fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<FileData>> {
+    let mut fileset = make_hashset(config.comparer);
+    let needs_hash = config.comparer == FileDataCompareOption::Hash;
+
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
             let fname = entry.file_name().to_str().unwrap().to_string();
@@ -139,7 +136,7 @@ fn scan_folder(
         }
     }
 
-    Ok(())
+    Ok(fileset)
 }
 
 /// Make a hashset with the given comparison lambdas
