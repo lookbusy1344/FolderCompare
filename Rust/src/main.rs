@@ -47,13 +47,13 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
     // scan the folders and populate the HashSets
     if config.onethread {
         // scan the two folders in series, using one thread
-        files1 = scan_folder(&config, &config.folder1)?;
-        files2 = scan_folder(&config, &config.folder2)?;
+        files1 = scan_folder(config, &config.folder1)?;
+        files2 = scan_folder(config, &config.folder2)?;
     } else {
         // scan them in parallel
         let (resfiles1, resfiles2) = rayon::join(
-            move || scan_folder(&config, &config.folder1),
-            move || scan_folder(&config, &config.folder2),
+            || scan_folder(config, &config.folder1),
+            || scan_folder(config, &config.folder2),
         );
 
         files1 = resfiles1?;
@@ -133,26 +133,25 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<CustomHashSet<File
 
 /// Make a hashset with the given comparison lambdas
 fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData> {
-    // *** This can probably be improved by using functions instead of closures
     let buckets_required = 100usize;
     let default_bucket_size = 100usize;
 
     match option {
         FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
-            Box::new(eq_filename),
-            Box::new(hash_filename),
+            eq_filename,
+            hash_filename,
             buckets_required,
             default_bucket_size,
         ),
         FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
-            Box::new(eq_filename_size),
-            Box::new(hash_filename_size),
+            eq_filename_size,
+            hash_filename_size,
             buckets_required,
             default_bucket_size,
         ),
         FileDataCompareOption::Hash => CustomHashSet::<FileData>::new(
-            Box::new(eq_sha2),
-            Box::new(hash_sha2),
+            eq_sha2,
+            hash_sha2,
             buckets_required,
             default_bucket_size,
         ),

@@ -6,8 +6,8 @@ use std::{
 };
 
 // types for equality and hash functions
-pub type EqualityFn<T> = dyn Fn(&T, &T) -> bool;
-pub type HashFn<T> = dyn Fn(&T) -> usize;
+pub type EqualityFn<T> = fn(&T, &T) -> bool;
+pub type HashFn<T> = fn(&T) -> usize;
 
 /// A simple custom hash set that takes two lambda expressions for equality and hashing
 pub struct CustomHashSet<T> {
@@ -16,16 +16,16 @@ pub struct CustomHashSet<T> {
     /// store the capacity of the buckets
     buckets_required: usize,
     /// store the equality function as a field
-    eq_fn: Box<EqualityFn<T>>,
+    eq_fn: EqualityFn<T>,
     /// store the hash function as a field
-    hash_fn: Box<HashFn<T>>,
+    hash_fn: HashFn<T>,
 }
 
 impl<T> CustomHashSet<T> {
     // Create a new CustomHashSet with the given equality and hash functions and an initial capacity
     pub fn new(
-        eq_fn: Box<EqualityFn<T>>,
-        hash_fn: Box<HashFn<T>>,
+        eq_fn: EqualityFn<T>,
+        hash_fn: HashFn<T>,
         buckets_required: usize,
         default_bucket_size: usize,
     ) -> Self {
