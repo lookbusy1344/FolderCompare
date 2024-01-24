@@ -93,47 +93,30 @@ fn main() -> anyhow::Result<()> {
 /// Wrapper around main scanning and comparison. Only needed because this is generic over the comparison type U
 fn scan_and_check(config: &Config) -> anyhow::Result<()> {
     // create the hashsets
-    let mut files1 = match config.comparer {
-        FileDataCompareOption::Name => CustomHashSet::<FileData2>::new(
-            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename),
-            Box::new(|x: &FileData2| get_hash(&x.filename)),
-            buckets_required,
-            default_bucket_size,
-        ),
-        FileDataCompareOption::NameSize => CustomHashSet::<FileData2>::new(
-            Box::new(|a: &FileData2, b: &FileData2| a.filename == b.filename && a.size == b.size),
-            Box::new(|x: &FileData2| get_hash(&(x.filename, x.size))),
-            buckets_required,
-            default_bucket_size,
-        ),
-        FileDataCompareOption::Hash => CustomHashSet::<FileData2>::new(
-            Box::new(|a: &FileData2, b: &FileData2| a.hash == b.hash),
-            Box::new(|x: &FileData2| get_hash(&x.hash)),
-            buckets_required,
-            default_bucket_size,
-        ),
-    };
+    let mut files1 = make_hashset(config.comparer);
+    let mut files2 = make_hashset(config.comparer);
+
+    let needshash = config.comparer == FileDataCompareOption::Hash;
 
     // scan the folders and populate the HashSets
-    let files1;
-    let files2;
     if config.onethread {
         // scan the two folders in series, using one thread
-        files1 = scan_folder::<U>(&config.folder1, config.comparer)?;
-        files2 = scan_folder::<U>(&config.folder2, config.comparer)?;
+        scan_folder(&config.folder1, needshash, &mut files1)?;
+        scan_folder(&config.folder2, needshash, &mut files2)?;
     } else {
-        // scan them in parallel
-        let (resfiles1, resfiles2) = rayon::join(
-            || scan_folder::<U>(&config.folder1, config.comparer),
-            || scan_folder::<U>(&config.folder2, config.comparer),
-        );
+        panic!("Not implemented");
+        // // scan them in parallel
+        // let (resfiles1, resfiles2) = rayon::join(
+        //     || scan_folder::<U>(&config.folder1, config.comparer),
+        //     || scan_folder::<U>(&config.folder2, config.comparer),
+        // );
 
-        files1 = resfiles1?;
-        files2 = resfiles2?;
+        // files1 = resfiles1?;
+        // files2 = resfiles2?;
     }
 
     // find whats in files1, but not in files2
-    let diff1: Vec<_> = files1.difference(&files2).collect();
+    let diff1 = files1.difference(&files2);
     show_results(&diff1, &config.folder1, &config.folder2, config.raw);
 
     // count the differences
@@ -142,7 +125,7 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
         diff1.len()
     } else {
         // find whats in files2, but not in files1
-        let diff2: Vec<_> = files2.difference(&files1).collect();
+        let diff2 = files2.difference(&files1);
         show_results(&diff2, &config.folder2, &config.folder1, config.raw);
 
         // yield both counts
@@ -157,12 +140,7 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
 }
 
 /// Show the results of the comparison
-fn show_results<U: UniqueTrait>(
-    differences: &Vec<&FileData<U>>,
-    presentindir: &Path,
-    absentindir: &Path,
-    raw: bool,
-) {
+fn show_results(differences: &Vec<&FileData2>, presentindir: &Path, absentindir: &Path, raw: bool) {
     if !raw {
         println!(
             "Files in '{}' but not in '{}'",
@@ -211,6 +189,7 @@ fn scan_folder(
 
 /// Make a hashset with the given comparison lambdas
 fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData2> {
+    // *** This can probably be improved by using functions instead of closures
     let buckets_required = 100usize;
     let default_bucket_size = 100usize;
 
@@ -229,7 +208,8 @@ fn make_hashset(option: FileDataCompareOption) -> CustomHashSet<FileData2> {
         ),
         FileDataCompareOption::Hash => CustomHashSet::<FileData2>::new(
             Box::new(|a: &FileData2, b: &FileData2| a.hash == b.hash),
-            Box::new(|x: &FileData2| get_hash(&x.hash)),
+            Box::new(|x: &FileData2| x.hash.to_usize()),
+            //Box::new(|x: &FileData2| get_hash(&x.hash)),
             buckets_required,
             default_bucket_size,
         ),
