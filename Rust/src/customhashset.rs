@@ -124,6 +124,29 @@ impl<T> CustomHashSet<T> {
         self.iter().filter(move |item| !other.contains(item))
     }
 
+    pub fn rebuild(&mut self, buckets_required: usize, default_bucket_size: usize) {
+        // create a vector of empty vectors with the given capacity
+        let mut new_buckets = create_buckets(buckets_required, default_bucket_size);
+        for item in self.iter() {
+            // use the hash function to get the hash of the value
+            let hash = (self.hash_fn)(item);
+
+            // get the index of the bucket where the value should go
+            // modulo by the capacity. This will truncate on 32-bit systems
+            let index = hash % buckets_required;
+
+            // get a reference to the bucket
+            let bucket = &mut new_buckets[index];
+
+            // push the value to the bucket and return true
+            bucket.push(*item);
+        }
+
+        // return a new CustomHashSet with the buckets, capacity and functions
+        self.buckets = new_buckets;
+        self.buckets_required = buckets_required;
+    }
+
     /// Iterate over the hash set
     #[inline]
     pub fn iter(&self) -> impl Iterator<Item = &T> {
