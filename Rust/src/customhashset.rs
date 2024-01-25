@@ -124,25 +124,24 @@ impl<T> CustomHashSet<T> {
         self.iter().filter(move |item| !other.contains(item))
     }
 
+    /// Rebuild the hashset with given buckets and sizes
     pub fn rebuild(&mut self, buckets_required: usize, default_bucket_size: usize) {
-        // create a vector of empty vectors with the given capacity
         let mut new_buckets = create_buckets(buckets_required, default_bucket_size);
-        for item in self.iter() {
-            // use the hash function to get the hash of the value
-            let hash = (self.hash_fn)(item);
 
-            // get the index of the bucket where the value should go
-            // modulo by the capacity. This will truncate on 32-bit systems
-            let index = hash % buckets_required;
+        // take ownership of the old buckets. self.buckets is now an empty vector
+        let old_buckets = std::mem::take(&mut self.buckets);
 
-            // get a reference to the bucket
-            let bucket = &mut new_buckets[index];
-
-            // push the value to the bucket and return true
-            bucket.push(*item);
+        for mut bucket in old_buckets {
+            for item in bucket.drain(..) {
+                // for each item in the bucket, get the hash and the index of the new bucket
+                // doesn't require equality check, because the source items are unique
+                let hash = (self.hash_fn)(&item);
+                let index = hash % buckets_required;
+                new_buckets[index].push(item);
+            }
         }
 
-        // return a new CustomHashSet with the buckets, capacity and functions
+        // replace the empty buckets with the new buckets
         self.buckets = new_buckets;
         self.buckets_required = buckets_required;
     }
