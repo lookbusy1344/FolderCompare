@@ -61,6 +61,23 @@ pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<Sha2Value> {
     Ok(Sha2Value::new(&h))
 }
 
+pub fn hash_string<D: Digest>(text: &str) -> anyhow::Result<Sha2Value> {
+    let mut hasher = D::new();
+    hasher.update(text);
+    let h = hasher.finalize();
+
+    Ok(Sha2Value::new(&h))
+}
+
+pub fn hash_string_and_size<D: Digest>(text: &str, size: u64) -> anyhow::Result<Sha2Value> {
+    let mut hasher = D::new();
+    hasher.update(text);
+    hasher.update(&size.to_le_bytes());
+    let h = hasher.finalize();
+
+    Ok(Sha2Value::new(&h))
+}
+
 /*
 /// Hash a string slice using the given hasher as a Digest implementation
 /// Returns a `Sha2Value`, which is a wrapper around a [u8; 32]
