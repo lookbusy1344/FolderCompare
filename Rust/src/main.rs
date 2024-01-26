@@ -123,7 +123,7 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
             let fpath = entry.path().to_str().unwrap().to_string();
             let fsize = entry.metadata().unwrap().len();
 
-            // generate the SHA2 key
+            // generate the SHA2 key according to the comparison option
             let key = match config.comparer {
                 FileDataCompareOption::Name => hash_string::<sha2::Sha256>(fname.as_str()),
                 FileDataCompareOption::NameSize => {
@@ -137,7 +137,6 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
                 FileData {
                     filename: fname,
                     size: fsize,
-                    hash: Sha2Value::default(),
                     path: fpath,
                 },
             );

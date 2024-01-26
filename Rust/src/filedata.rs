@@ -21,7 +21,7 @@ pub fn parse_comparer(
 // =================================================================================================
 
 // A struct to hold the hash value, without the overhead of a String
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Sha2Value {
     pub hash: [u8; 32],
 }
@@ -52,10 +52,10 @@ pub enum FileDataCompareOption {
 // Implementations for FileData and the various comparison options
 
 /// Represents a file, with name, pathname, size and optional hash. U is the type of comparison
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone)]
 pub struct FileData {
     pub filename: String,
     pub path: String,
     pub size: u64,
-    pub hash: Sha2Value,
+    // pub hash: Sha2Value, - no longer needed because the hashmap has a key
 }
