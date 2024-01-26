@@ -4,10 +4,7 @@
 
 #[allow(clippy::wildcard_imports)]
 use filedata::*;
-use std::collections::HashSet;
-use std::hash::Hash;
-use std::marker::PhantomData;
-use std::path::Path;
+use std::{collections::HashSet, path::Path};
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 use walkdir::WalkDir;
@@ -16,45 +13,8 @@ mod filedata;
 mod utils;
 
 fn main() -> anyhow::Result<()> {
-    let mut pargs = pico_args::Arguments::from_env();
-    let raw = pargs.contains(["-r", "--raw"]);
-    if !raw {
-        println!(
-            "Folder_comparer Rust, ver: {}, commit: {}",
-            VERSION.unwrap_or("?"),
-            GIT_VERSION
-        );
-        println!();
-    }
-
-    if pargs.contains(["-h", "--help"]) {
-        println!("{HELP}");
-        return Ok(());
-    }
-
-    let path1: String = pargs.value_from_str(["-a", "--foldera"])?;
-    let path2: String = pargs.value_from_str(["-b", "--folderb"])?;
-    let compstr: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
-    let compareropt = parse_comparer(&compstr);
-
-    if compareropt.is_err() {
-        return Err(anyhow::anyhow!(
-            "Comparison should be Name, NameSize or Hash"
-        ));
-    }
-
-    // package the config options, so they can be easily passed around
-    let config = Config {
-        folder1: Path::new(&path1).canonicalize()?,
-        folder2: Path::new(&path2).canonicalize()?,
-        comparer: compareropt.unwrap(),
-        raw,
-        firstonly: pargs.contains(["-f", "--first-only"]),
-        onethread: pargs.contains(["-o", "--one-thread"]),
-    };
-
-    // Check for unused arguments, and error out if there are any
-    args_finished(pargs)?;
+    // parse the command line arguments
+    let config = parse_args()?;
 
     // comparing a folder with itself is pointless
     if config.folder1 == config.folder2 {
@@ -71,41 +31,27 @@ fn main() -> anyhow::Result<()> {
         println!();
     }
 
-    // call the appropriate comparison function
-    // this is a bit ugly but HashSet doesnt have pluggable comparers
-    match config.comparer {
-        FileDataCompareOption::Name => {
-            scan_and_check::<UniqueName>(&config)?;
-        }
-        FileDataCompareOption::NameSize => {
-            scan_and_check::<UniqueNameSize>(&config)?;
-        }
-        FileDataCompareOption::Hash => {
-            scan_and_check::<UniqueHash>(&config)?;
-        }
-    }
+    scan_and_check(&config)?;
 
     Ok(())
 }
 
 /// Wrapper around main scanning and comparison. Only needed because this is generic over the comparison type U
-fn scan_and_check<U>(config: &Config) -> anyhow::Result<()>
-where
-    FileData<U>: Eq + Hash, // FileData<U> must be properly comparable
-    U: UniqueTrait,         // U must be a Unique key marker
-{
-    // scan the folders and populate the HashSets
+fn scan_and_check(config: &Config) -> anyhow::Result<()> {
+    // create the hashsets
     let files1;
     let files2;
+
+    // scan the folders and populate the HashSets
     if config.onethread {
         // scan the two folders in series, using one thread
-        files1 = scan_folder::<U>(&config.folder1, config.comparer)?;
-        files2 = scan_folder::<U>(&config.folder2, config.comparer)?;
+        files1 = scan_folder(config, &config.folder1)?;
+        files2 = scan_folder(config, &config.folder2)?;
     } else {
         // scan them in parallel
         let (resfiles1, resfiles2) = rayon::join(
-            || scan_folder::<U>(&config.folder1, config.comparer),
-            || scan_folder::<U>(&config.folder2, config.comparer),
+            || scan_folder(config, &config.folder1),
+            || scan_folder(config, &config.folder2),
         );
 
         files1 = resfiles1?;
@@ -131,18 +77,24 @@ where
 
     if !config.raw {
         println!("{count} difference(s) found");
+
+        // *** hashset stats ***
+        // let lbs1 = files1.largest_bucket_size();
+        // let lbs2 = files2.largest_bucket_size();
+        // let empty1 = files1.empty_buckets();
+        // let empty2 = files2.empty_buckets();
+        // let size1 = files1.len();
+        // let size2 = files2.len();
+
+        // println!("Folder1: {size1} files, largest bucket size {lbs1}, empty buckets {empty1}");
+        // println!("Folder2: {size2} files, largest bucket size {lbs2}, empty buckets {empty2}");
     }
 
     Ok(())
 }
 
 /// Show the results of the comparison
-fn show_results<U: UniqueTrait>(
-    differences: &Vec<&FileData<U>>,
-    presentindir: &Path,
-    absentindir: &Path,
-    raw: bool,
-) {
+fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: &Path, raw: bool) {
     if !raw {
         println!(
             "Files in '{}' but not in '{}'",
@@ -161,16 +113,10 @@ fn show_results<U: UniqueTrait>(
     }
 }
 
-/// Scan a folder and return a set of files
-fn scan_folder<U>(
-    dir: &Path,
-    comparer: FileDataCompareOption,
-) -> anyhow::Result<HashSet<FileData<U>>>
-where
-    FileData<U>: Eq + Hash, // FileData<U> must be properly comparable
-    U: UniqueTrait,         // U must be a Unique key marker
-{
-    let mut fileset: HashSet<FileData<U>> = HashSet::with_capacity(200);
+/// Scan a folder and build hashset with the files
+fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashSet<FileData>> {
+    let mut fileset = make_hashset(config);
+    let include_sha2 = config.comparer == FileDataCompareOption::Hash;
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
@@ -178,19 +124,40 @@ where
             let fpath = entry.path().to_str().unwrap().to_string();
             let fsize = entry.metadata().unwrap().len();
 
-            fileset.insert(FileData::<U> {
+            fileset.insert(FileData {
                 filename: fname,
                 size: fsize,
-                hash: if comparer == FileDataCompareOption::Hash {
+                hash: if include_sha2 {
                     hash_file::<sha2::Sha256>(fpath.as_str())?
                 } else {
                     Sha2Value::default()
                 },
                 path: fpath, // needs to come after hash because it consumes fpath
-                phantom: PhantomData,
             });
         }
     }
 
     Ok(fileset)
+}
+
+/// Make a hashset with the given comparison lambdas
+fn make_hashset(config: &Config) -> HashSet<FileData> {
+    HashSet::new()
+    // match config.comparer {
+    //     FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
+    //         eq_filename,
+    //         hash_filename,
+    //         config.buckets,
+    //         DEFAULT_BUCKET_SIZE,
+    //     ),
+    //     FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
+    //         eq_filename_size,
+    //         hash_filename_size,
+    //         config.buckets,
+    //         DEFAULT_BUCKET_SIZE,
+    //     ),
+    //     FileDataCompareOption::Hash => {
+    //         CustomHashSet::<FileData>::new(eq_sha2, hash_sha2, config.buckets, DEFAULT_BUCKET_SIZE)
+    //     }
+    // }
 }
