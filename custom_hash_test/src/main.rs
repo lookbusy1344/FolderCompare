@@ -4,6 +4,7 @@ use customhashset::get_hash;
 use customhashset::CustomHashSet;
 use rand::{thread_rng, Rng};
 mod customhashset;
+mod pluggablehashset;
 
 const INT_ITERATIONS: usize = 2_000_000;
 const STR_ITERATIONS: usize = 500_000;
