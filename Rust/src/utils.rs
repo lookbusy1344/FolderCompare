@@ -75,7 +75,7 @@ pub fn hash_string<D: Digest>(text: &str) -> Sha2Value {
 pub fn hash_string_and_size<D: Digest>(text: &str, size: u64) -> Sha2Value {
     let mut hasher = D::new();
     hasher.update(text);
-    hasher.update(&size.to_le_bytes());
+    hasher.update(size.to_le_bytes());
     let h = hasher.finalize();
 
     Sha2Value::new(&h)
@@ -147,15 +147,15 @@ pub fn parse_args() -> anyhow::Result<Config> {
     Ok(config)
 }
 
-/// Scan A and return a HashMap of the records not found in B
-pub fn hashmap_difference(
-    a: &HashMap<Sha2Value, FileData>,
-    b: &HashMap<Sha2Value, FileData>,
-) -> HashMap<Sha2Value, FileData> {
-    let mut diff = HashMap::new();
-    for (k, _) in a {
+/// Scan A and return a vector of the records not found in B
+pub fn hashmap_difference<'a>(
+    a: &'a HashMap<Sha2Value, FileData>,
+    b: &'a HashMap<Sha2Value, FileData>,
+) -> Vec<&'a FileData> {
+    let mut diff = Vec::new();
+    for (k, v) in a {
         if !b.contains_key(k) {
-            diff.insert(*k, a[k].clone());
+            diff.push(v);
         }
     }
     diff

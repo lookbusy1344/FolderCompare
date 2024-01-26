@@ -4,10 +4,7 @@
 
 #[allow(clippy::wildcard_imports)]
 use filedata::*;
-use std::{
-    collections::{HashMap, HashSet},
-    path::Path,
-};
+use std::{collections::HashMap, path::Path};
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 use walkdir::WalkDir;
@@ -62,11 +59,7 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
     }
 
     // find whats in files1, but not in files2
-
-    let diff1: Vec<_> = files1
-        .iter()
-        .filter(|(k, v)| files2.get(k) != Some(v))
-        .collect();
+    let diff1 = hashmap_difference(&files1, &files2);
     show_results(&diff1, &config.folder1, &config.folder2, config.raw);
 
     // count the differences
@@ -75,10 +68,7 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
         diff1.len()
     } else {
         // find whats in files2, but not in files1
-        let diff2: Vec<_> = files2
-            .iter()
-            .filter(|(k, v)| files1.get(k) != Some(v))
-            .collect();
+        let diff2 = hashmap_difference(&files2, &files1);
         show_results(&diff2, &config.folder2, &config.folder1, config.raw);
 
         // yield both counts
@@ -125,8 +115,7 @@ fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: 
 
 /// Scan a folder and build hashset with the files
 fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value, FileData>> {
-    let mut fileset: HashMap<Sha2Value, FileData> = HashMap::new();
-    let include_sha2 = config.comparer == FileDataCompareOption::Hash;
+    let mut fileset: HashMap<Sha2Value, FileData> = HashMap::with_capacity(200);
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
@@ -134,6 +123,7 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
             let fpath = entry.path().to_str().unwrap().to_string();
             let fsize = entry.metadata().unwrap().len();
 
+            // generate the SHA2 key
             let key = match config.comparer {
                 FileDataCompareOption::Name => hash_string::<sha2::Sha256>(fname.as_str()),
                 FileDataCompareOption::NameSize => {
@@ -147,8 +137,8 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
                 FileData {
                     filename: fname,
                     size: fsize,
-                    hash: key,
-                    path: fpath, // needs to come after hash because it consumes fpath
+                    hash: Sha2Value::default(),
+                    path: fpath,
                 },
             );
         }
