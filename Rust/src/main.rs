@@ -4,7 +4,10 @@
 
 #[allow(clippy::wildcard_imports)]
 use filedata::*;
-use std::{collections::HashSet, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 use walkdir::WalkDir;
@@ -59,7 +62,11 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
     }
 
     // find whats in files1, but not in files2
-    let diff1: Vec<_> = files1.difference(&files2).collect();
+
+    let diff1: Vec<_> = files1
+        .iter()
+        .filter(|(k, v)| files2.get(k) != Some(v))
+        .collect();
     show_results(&diff1, &config.folder1, &config.folder2, config.raw);
 
     // count the differences
@@ -68,7 +75,10 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
         diff1.len()
     } else {
         // find whats in files2, but not in files1
-        let diff2: Vec<_> = files2.difference(&files1).collect();
+        let diff2: Vec<_> = files2
+            .iter()
+            .filter(|(k, v)| files1.get(k) != Some(v))
+            .collect();
         show_results(&diff2, &config.folder2, &config.folder1, config.raw);
 
         // yield both counts
@@ -114,8 +124,8 @@ fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: 
 }
 
 /// Scan a folder and build hashset with the files
-fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashSet<FileData>> {
-    let mut fileset = make_hashset(config);
+fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value, FileData>> {
+    let mut fileset: HashMap<Sha2Value, FileData> = HashMap::new();
     let include_sha2 = config.comparer == FileDataCompareOption::Hash;
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
@@ -124,40 +134,25 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashSet<FileData>>
             let fpath = entry.path().to_str().unwrap().to_string();
             let fsize = entry.metadata().unwrap().len();
 
-            fileset.insert(FileData {
-                filename: fname,
-                size: fsize,
-                hash: if include_sha2 {
-                    hash_file::<sha2::Sha256>(fpath.as_str())?
-                } else {
-                    Sha2Value::default()
+            let key = match config.comparer {
+                FileDataCompareOption::Name => hash_string::<sha2::Sha256>(fname.as_str()),
+                FileDataCompareOption::NameSize => {
+                    hash_string_and_size::<sha2::Sha256>(fname.as_str(), fsize)
+                }
+                FileDataCompareOption::Hash => hash_file::<sha2::Sha256>(fpath.as_str())?,
+            };
+
+            fileset.insert(
+                key,
+                FileData {
+                    filename: fname,
+                    size: fsize,
+                    hash: key,
+                    path: fpath, // needs to come after hash because it consumes fpath
                 },
-                path: fpath, // needs to come after hash because it consumes fpath
-            });
+            );
         }
     }
 
     Ok(fileset)
-}
-
-/// Make a hashset with the given comparison lambdas
-fn make_hashset(config: &Config) -> HashSet<FileData> {
-    HashSet::new()
-    // match config.comparer {
-    //     FileDataCompareOption::Name => CustomHashSet::<FileData>::new(
-    //         eq_filename,
-    //         hash_filename,
-    //         config.buckets,
-    //         DEFAULT_BUCKET_SIZE,
-    //     ),
-    //     FileDataCompareOption::NameSize => CustomHashSet::<FileData>::new(
-    //         eq_filename_size,
-    //         hash_filename_size,
-    //         config.buckets,
-    //         DEFAULT_BUCKET_SIZE,
-    //     ),
-    //     FileDataCompareOption::Hash => {
-    //         CustomHashSet::<FileData>::new(eq_sha2, hash_sha2, config.buckets, DEFAULT_BUCKET_SIZE)
-    //     }
-    // }
 }

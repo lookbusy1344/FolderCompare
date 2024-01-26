@@ -1,11 +1,12 @@
 use git_version::git_version;
 use sha2::Digest;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 
 use crate::filedata::{FileDataCompareOption, Sha2Value};
-use crate::parse_comparer;
+use crate::{parse_comparer, FileData};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=+"]);
@@ -144,4 +145,18 @@ pub fn parse_args() -> anyhow::Result<Config> {
     }
 
     Ok(config)
+}
+
+/// Scan A and return a HashMap of the records not found in B
+pub fn hashmap_difference(
+    a: &HashMap<Sha2Value, FileData>,
+    b: &HashMap<Sha2Value, FileData>,
+) -> HashMap<Sha2Value, FileData> {
+    let mut diff = HashMap::new();
+    for (k, _) in a {
+        if !b.contains_key(k) {
+            diff.insert(*k, a[k].clone());
+        }
+    }
+    diff
 }
