@@ -87,11 +87,17 @@ public readonly record struct Sha2Value
 
 	public override string ToString()
 	{
-		var builder = new StringBuilder(Size * 2);
+		// the only heap allocation this makes is the final string itself
+		Span<char> chars = stackalloc char[Size * 2];
+		var pos = 0;
 
 		foreach (var b in val)
-			_ = builder.AppendFormat("{0:x2}", b);
+		{
+			var (high, low) = HashUtils.ByteToHex(b);
+			chars[pos++] = high;
+			chars[pos++] = low;
+		}
 
-		return builder.ToString();
+		return chars.ToString();
 	}
 }

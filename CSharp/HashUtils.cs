@@ -7,6 +7,8 @@ namespace FolderCompare;
 
 internal static class HashUtils
 {
+	private static readonly char[] CharLookup = "0123456789abcdef".ToCharArray();
+
 	/// <summary>
 	/// Wrapper around TryWriteBytes that throws an exception if it fails, for uint
 	/// </summary>
@@ -26,6 +28,11 @@ internal static class HashUtils
 		if (!BitConverter.TryWriteBytes(destination, value))
 			ThrowError();
 	}
+
+	/// <summary>
+	/// Turn a byte into 2 hex chars, without heap allocations
+	/// </summary>
+	public static (char high, char low) ByteToHex(byte b) => (CharLookup[b >> 4], CharLookup[b & 0x0F]);
 
 	/// <summary>
 	/// An optimising routine to improving inlining of BitConverter.TryWriteBytes
