@@ -86,13 +86,5 @@ public readonly record struct Sha1Value
 	/// </summary>
 	public void ToBytes(Span<byte> bytes) => ((ReadOnlySpan<byte>)val).CopyTo(bytes);
 
-	public override string ToString()
-	{
-		var builder = new StringBuilder(Size * 2);
-
-		foreach (var b in val)
-			_ = builder.AppendFormat("{0:x2}", b);
-
-		return builder.ToString();
-	}
+	public override string ToString() => HashUtils.ToHexString(val);
 }

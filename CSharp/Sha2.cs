@@ -85,19 +85,5 @@ public readonly record struct Sha2Value
 	/// </summary>
 	public void ToBytes(Span<byte> bytes) => ((ReadOnlySpan<byte>)val).CopyTo(bytes);
 
-	public override string ToString()
-	{
-		// the only heap allocation this makes is the final string itself
-		Span<char> chars = stackalloc char[Size * 2];
-		var pos = 0;
-
-		foreach (var b in val)
-		{
-			var (high, low) = HashUtils.ByteToHex(b);
-			chars[pos++] = high;
-			chars[pos++] = low;
-		}
-
-		return chars.ToString();
-	}
+	public override string ToString() => HashUtils.ToHexString(val);
 }

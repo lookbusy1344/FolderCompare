@@ -7,6 +7,9 @@ namespace FolderCompare;
 
 internal static class HashUtils
 {
+	/// <summary>
+	/// Used to lookup nibbles in ByteToHex - 0='0' and 15='f'
+	/// </summary>
 	private static readonly char[] CharLookup = "0123456789abcdef".ToCharArray();
 
 	/// <summary>
@@ -32,7 +35,29 @@ internal static class HashUtils
 	/// <summary>
 	/// Turn a byte into 2 hex chars, without heap allocations
 	/// </summary>
-	public static (char high, char low) ByteToHex(byte b) => (CharLookup[b >> 4], CharLookup[b & 0x0F]);
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static (char high, char low) ByteToHex(byte b) => (CharLookup[b >> 4], CharLookup[b & 0x0F]);
+
+	/// <summary>
+	/// Turn this span into a hex string, without heap allocations (except for the final string)
+	/// </summary>
+	public static string ToHexString(ReadOnlySpan<byte> sourcebytes)
+	{
+		// each byte becomes 2 chars, ie 254 = 1111_1110 = "fe"
+		Span<char> charbuffer = stackalloc char[sourcebytes.Length * 2];
+		var pos = 0;
+
+		foreach (var current in sourcebytes)
+		{
+			// get the high and low nibbles, and append to destination
+			var (high, low) = ByteToHex(current);
+			charbuffer[pos++] = high;
+			charbuffer[pos++] = low;
+		}
+
+		// one heap allocation, to turn the char span into a string
+		return charbuffer.ToString();
+	}
 
 	/// <summary>
 	/// An optimising routine to improving inlining of BitConverter.TryWriteBytes
