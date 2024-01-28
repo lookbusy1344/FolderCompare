@@ -1,0 +1,42 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cargo",
+			"command": "build",
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "cargo",
+			"command": "run",
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"label": "rust: cargo run"
+		},
+		{
+			"type": "cargo",
+			"command": "clippy",
+			"args": [
+				"--",
+				"-D", "clippy::all",
+				"-D", "clippy::pedantic"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"label": "rust: cargo clippy pedantic"
+		}
+	]
+}
