@@ -9,8 +9,9 @@ internal static class HashUtils
 {
 	/// <summary>
 	/// Used to lookup nibbles in ByteToHex - 0='0' and 15='f'
+	/// See Framework Design Guidelines, 3rd Edition, sec 9.12 page 438
 	/// </summary>
-	private static readonly char[] CharLookup = "0123456789abcdef".ToCharArray();
+	private static ReadOnlySpan<char> CharLookup => "0123456789abcdef".ToCharArray();
 
 	/// <summary>
 	/// Wrapper around TryWriteBytes that throws an exception if it fails, for uint
