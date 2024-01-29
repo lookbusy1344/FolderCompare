@@ -8,12 +8,6 @@ namespace FolderCompare;
 internal static class HashUtils
 {
 	/// <summary>
-	/// Used to lookup nibbles in ByteToHex - 0='0' and 15='f'
-	/// See Framework Design Guidelines, 3rd Edition, sec 9.12 page 438
-	/// </summary>
-	private static ReadOnlySpan<char> CharLookup => "0123456789abcdef".ToCharArray();
-
-	/// <summary>
 	/// Wrapper around TryWriteBytes that throws an exception if it fails, for uint
 	/// </summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -34,12 +28,6 @@ internal static class HashUtils
 	}
 
 	/// <summary>
-	/// Turn a byte into 2 hex chars, without heap allocations
-	/// </summary>
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static (char high, char low) ByteToHex(byte b) => (CharLookup[b >> 4], CharLookup[b & 0x0F]);
-
-	/// <summary>
 	/// Turn this span into a hex string, without heap allocations (except for the final string)
 	/// </summary>
 	public static string ToHexString(ReadOnlySpan<byte> sourcebytes)
@@ -51,9 +39,9 @@ internal static class HashUtils
 		foreach (var current in sourcebytes)
 		{
 			// get the high and low nibbles, and append to destination
-			var (high, low) = ByteToHex(current);
-			charbuffer[pos++] = high;
-			charbuffer[pos++] = low;
+			var h = HexByte.FromByte(current);
+			charbuffer[pos++] = h.HighChar;
+			charbuffer[pos++] = h.LowChar;
 		}
 
 		// one heap allocation, to turn the char span into a string
@@ -177,6 +165,26 @@ public static class HashBuilder
 
 		return new Sha2Value(hash);
 	}
+}
+
+/// <summary>
+/// Two chars, representing a single byte in hex
+/// </summary>
+public readonly record struct HexByte(char HighChar, char LowChar)
+{
+	/// <summary>
+	/// Used to lookup nibbles in ByteToHex - 0='0' and 15='f'
+	/// See Framework Design Guidelines, 3rd Edition, sec 9.12 page 438
+	/// </summary>
+	private static ReadOnlySpan<char> CharLookup => "0123456789abcdef".ToCharArray();
+
+	public override string ToString() => $"{HighChar}{LowChar}";
+
+	/// <summary>
+	/// Turn a byte into hex representation, without heap allocations
+	/// </summary>
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static HexByte FromByte(byte b) => new(CharLookup[b >> 4], CharLookup[b & 0x0F]); // high nibble, low nibble
 }
 
 //public static class ByteUtils
