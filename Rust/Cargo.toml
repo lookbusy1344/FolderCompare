@@ -14,8 +14,8 @@ lto = 'fat'
 anyhow = "> 1.0.68"
 git-version = "> 0.3.4"
 pico-args = ">= 0.5"
-sha2 = "> 0.10.4"
+sha2 = { default-features = false, version = "> 0.10.4" }
 walkdir = "> 2.3.2"
-strum = { version = ">= 0.24.1", features = ["derive"] }
-base64 = "> 0.21.1"
+strum = { version = ">= 0.24.1", features = ["derive"], default-features = false }
+base64 = { default-features = false, version = "> 0.21.1" }
 rayon = ">= 1.7.0"
