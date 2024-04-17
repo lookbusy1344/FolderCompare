@@ -1,7 +1,13 @@
 # Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
 
-# C# files
+# Razor specific stuff Jan 2024
+[*.{cshtml,razor}]
+charset = utf-8
+trim_trailing_whitespace = true
+
+
+# C# files and Razor pages
 [*.{cs,cshtml,razor}]
 
 #### Core EditorConfig Options ####
@@ -403,3 +409,6 @@ dotnet_diagnostic.VSTHRD012.severity = none
 
 # VSTHRD003: Avoid awaiting foreign Tasks
 dotnet_diagnostic.VSTHRD003.severity = none
+
+# VSTHRD103: Call async methods when in an async method, duplicate of CA1849
+dotnet_diagnostic.VSTHRD103.severity = none
