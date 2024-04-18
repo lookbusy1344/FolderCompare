@@ -14,7 +14,7 @@ internal static class HashUtils
 	public static void WriteBytes(Span<byte> destination, uint value)
 	{
 		if (!BitConverter.TryWriteBytes(destination, value))
-			ThrowError();
+			ExHelper.AlwaysThrow(new InvalidOperationException("Could not write bytes to span"));
 	}
 
 	/// <summary>
@@ -24,7 +24,7 @@ internal static class HashUtils
 	public static void WriteBytes(Span<byte> destination, ulong value)
 	{
 		if (!BitConverter.TryWriteBytes(destination, value))
-			ThrowError();
+			ExHelper.AlwaysThrow(new InvalidOperationException("Could not write bytes to span"));
 	}
 
 	/// <summary>
@@ -47,13 +47,6 @@ internal static class HashUtils
 		// one heap allocation, to turn the char span into a string
 		return charbuffer.ToString();
 	}
-
-	/// <summary>
-	/// An optimising routine to improving inlining of BitConverter.TryWriteBytes
-	/// Framework Design Guidelines sec 7.1, page 259
-	/// </summary>
-	[DoesNotReturn]
-	private static void ThrowError() => throw new InvalidOperationException("Could not write bytes to span");
 }
 
 /// <summary>
@@ -69,7 +62,7 @@ public static class HashBuilder
 		Span<byte> hash = stackalloc byte[32];
 		using var stream = File.OpenRead(file);
 		if (SHA256.HashData(stream, hash) != 32)
-			throw new Exception("Failed to compute hash");
+			ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
 
 		return new Sha2Value(hash);
 	}
@@ -87,7 +80,7 @@ public static class HashBuilder
 		while (stream.Read(buffer) is int bytesRead && bytesRead > 0)
 		{
 			if (!SHA256.TryHashData(buffer, hash, out _))
-				throw new Exception("Failed to compute hash");
+				ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
 		}
 		return new Sha2Value(hash);
 	}
@@ -100,7 +93,7 @@ public static class HashBuilder
 	{
 		Span<byte> hash = stackalloc byte[32];
 		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _))
-			throw new Exception("Failed to compute hash");
+			ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
 		return new Sha2Value(hash);
 	}
 
@@ -116,12 +109,13 @@ public static class HashBuilder
 
 		Span<byte> buffer = stackalloc byte[byteCount];
 		if (Encoding.UTF8.GetBytes(text, buffer) != byteCount)
-			throw new Exception("Failed to convert string to bytes");
+			ExHelper.AlwaysThrow(new Exception("Failed to convert string to bytes"));
 
 		// now hash the bytes, again without heap allocations
 		Span<byte> hash = stackalloc byte[32];
 		if (!SHA256.TryHashData(buffer, hash, out _))
-			throw new Exception("Failed to compute hash");
+			ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
+
 		return new Sha2Value(hash);
 	}
 
@@ -157,7 +151,7 @@ public static class HashBuilder
 
 			// buffer range is 0..byteslastindex, so hash that
 			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _))
-				throw new Exception("Failed to compute hash");
+				ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
 
 			// move the offset forward
 			charoffset += charsToCopy;
@@ -185,6 +179,22 @@ public readonly record struct HexByte(char HighChar, char LowChar)
 	/// </summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static HexByte FromByte(byte b) => new(CharLookup[b >> 4], CharLookup[b & 0x0F]); // high nibble, low nibble
+}
+
+internal static class ExHelper
+{
+	/// <summary>
+	/// Framework design guidelines
+	/// Page 259 - Members that throw exceptions are less likely to be inlined. Moving the throw statement inside the builder might allow the member to be inlined.
+	/// </summary>
+	[DoesNotReturn]
+	internal static void AlwaysThrow(Exception ex) => throw ex;
+
+	///// <summary>
+	///// Throw provided exception, with a dummy return
+	///// </summary>
+	//[DoesNotReturn]
+	//internal static T AlwaysThrowNoReturn<T>(Exception ex) => throw ex;
 }
 
 //public static class ByteUtils
