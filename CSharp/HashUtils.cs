@@ -62,7 +62,7 @@ public static class HashBuilder
 		Span<byte> hash = stackalloc byte[32];
 		using var stream = File.OpenRead(file);
 		if (SHA256.HashData(stream, hash) != 32)
-			ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
+			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
 
 		return new Sha2Value(hash);
 	}
@@ -80,7 +80,7 @@ public static class HashBuilder
 		while (stream.Read(buffer) is int bytesRead && bytesRead > 0)
 		{
 			if (!SHA256.TryHashData(buffer, hash, out _))
-				ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
+				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
 		}
 		return new Sha2Value(hash);
 	}
@@ -93,7 +93,8 @@ public static class HashBuilder
 	{
 		Span<byte> hash = stackalloc byte[32];
 		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _))
-			ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
+			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+
 		return new Sha2Value(hash);
 	}
 
@@ -109,12 +110,12 @@ public static class HashBuilder
 
 		Span<byte> buffer = stackalloc byte[byteCount];
 		if (Encoding.UTF8.GetBytes(text, buffer) != byteCount)
-			ExHelper.AlwaysThrow(new Exception("Failed to convert string to bytes"));
+			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to convert string to bytes"));
 
 		// now hash the bytes, again without heap allocations
 		Span<byte> hash = stackalloc byte[32];
 		if (!SHA256.TryHashData(buffer, hash, out _))
-			ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
+			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
 
 		return new Sha2Value(hash);
 	}
@@ -151,7 +152,7 @@ public static class HashBuilder
 
 			// buffer range is 0..byteslastindex, so hash that
 			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _))
-				ExHelper.AlwaysThrow(new Exception("Failed to compute hash"));
+				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
 
 			// move the offset forward
 			charoffset += charsToCopy;
@@ -190,11 +191,11 @@ internal static class ExHelper
 	[DoesNotReturn]
 	internal static void AlwaysThrow(Exception ex) => throw ex;
 
-	///// <summary>
-	///// Throw provided exception, with a dummy return
-	///// </summary>
-	//[DoesNotReturn]
-	//internal static T AlwaysThrowNoReturn<T>(Exception ex) => throw ex;
+	/// <summary>
+	/// Throw provided exception, with a dummy return
+	/// </summary>
+	[DoesNotReturn]
+	internal static T AlwaysThrowNoReturn<T>(Exception ex) => throw ex;
 }
 
 //public static class ByteUtils
