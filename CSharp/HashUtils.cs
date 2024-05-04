@@ -13,8 +13,9 @@ internal static class HashUtils
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void WriteBytes(Span<byte> destination, uint value)
 	{
-		if (!BitConverter.TryWriteBytes(destination, value))
+		if (!BitConverter.TryWriteBytes(destination, value)) {
 			ExHelper.AlwaysThrow(new InvalidOperationException("Could not write bytes to span"));
+		}
 	}
 
 	/// <summary>
@@ -23,8 +24,9 @@ internal static class HashUtils
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void WriteBytes(Span<byte> destination, ulong value)
 	{
-		if (!BitConverter.TryWriteBytes(destination, value))
+		if (!BitConverter.TryWriteBytes(destination, value)) {
 			ExHelper.AlwaysThrow(new InvalidOperationException("Could not write bytes to span"));
+		}
 	}
 
 	/// <summary>
@@ -36,8 +38,7 @@ internal static class HashUtils
 		Span<char> charbuffer = stackalloc char[sourcebytes.Length * 2];
 		var pos = 0;
 
-		foreach (var current in sourcebytes)
-		{
+		foreach (var current in sourcebytes) {
 			// get the high and low nibbles, and append to destination
 			var h = HexByte.FromByte(current);
 			charbuffer[pos++] = h.HighChar;
@@ -61,8 +62,9 @@ public static class HashBuilder
 	{
 		Span<byte> hash = stackalloc byte[32];
 		using var stream = File.OpenRead(file);
-		if (SHA256.HashData(stream, hash) != 32)
+		if (SHA256.HashData(stream, hash) != 32) {
 			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+		}
 
 		return new Sha2Value(hash);
 	}
@@ -77,10 +79,10 @@ public static class HashBuilder
 		Span<byte> hash = stackalloc byte[32];
 
 		//while (stream.Read(MemoryMarshal.AsBytes(buffer)) is int bytesRead && bytesRead > 0)
-		while (stream.Read(buffer) is int bytesRead && bytesRead > 0)
-		{
-			if (!SHA256.TryHashData(buffer, hash, out _))
+		while (stream.Read(buffer) is int bytesRead && bytesRead > 0) {
+			if (!SHA256.TryHashData(buffer, hash, out _)) {
 				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+			}
 		}
 		return new Sha2Value(hash);
 	}
@@ -92,8 +94,9 @@ public static class HashBuilder
 	public static Sha2Value ComputeHashOfString(string text)
 	{
 		Span<byte> hash = stackalloc byte[32];
-		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _))
+		if (!SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _)) {
 			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+		}
 
 		return new Sha2Value(hash);
 	}
@@ -105,17 +108,20 @@ public static class HashBuilder
 	{
 		// convert string to bytes on the stack
 		var byteCount = Encoding.UTF8.GetByteCount(text);
-		if (byteCount > 4096)
+		if (byteCount > 4096) {
 			return ComputeHashOfString(text);
+		}
 
 		Span<byte> buffer = stackalloc byte[byteCount];
-		if (Encoding.UTF8.GetBytes(text, buffer) != byteCount)
+		if (Encoding.UTF8.GetBytes(text, buffer) != byteCount) {
 			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to convert string to bytes"));
+		}
 
 		// now hash the bytes, again without heap allocations
 		Span<byte> hash = stackalloc byte[32];
-		if (!SHA256.TryHashData(buffer, hash, out _))
+		if (!SHA256.TryHashData(buffer, hash, out _)) {
 			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+		}
 
 		return new Sha2Value(hash);
 	}
@@ -128,18 +134,21 @@ public static class HashBuilder
 	{
 		const int bufferSizeChars = 1024;
 
-		if (string.IsNullOrEmpty(text)) return Sha2Value.Empty;
+		if (string.IsNullOrEmpty(text)) {
+			return Sha2Value.Empty;
+		}
 
 		// buffer is 1024 chars, which is 1024-3072 bytes
 		Span<byte> buffer = stackalloc byte[bufferSizeChars * 3];
 		Span<byte> hash = stackalloc byte[32];
 
 		var charoffset = 0;
-		while (true)
-		{
+		while (true) {
 			// find the total number of chars left to process
 			var remainingChars = text.Length - charoffset;
-			if (remainingChars <= 0) break;
+			if (remainingChars <= 0) {
+				break;
+			}
 
 			// how many chars can we process into the buffer? (up to bufferSize)
 			var charsToCopy = Math.Min(bufferSizeChars, remainingChars);
@@ -151,8 +160,9 @@ public static class HashBuilder
 			var byteslastindex = Encoding.UTF8.GetBytes(textslice, buffer);
 
 			// buffer range is 0..byteslastindex, so hash that
-			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _))
+			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _)) {
 				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+			}
 
 			// move the offset forward
 			charoffset += charsToCopy;

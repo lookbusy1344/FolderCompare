@@ -37,9 +37,11 @@ public readonly record struct Sha2Value
 	/// </summary>
 	public readonly bool Equals(Sha2Value other)
 	{
-		for (var i = 0; i < Size; i++)
-			if (val[i] != other.val[i])
+		for (var i = 0; i < Size; i++) {
+			if (val[i] != other.val[i]) {
 				return false;
+			}
+		}
 
 		return true;
 	}
@@ -51,8 +53,9 @@ public readonly record struct Sha2Value
 	/// </summary>
 	public Sha2Value(ReadOnlySpan<byte> bytes)
 	{
-		if (bytes.Length != Size)
+		if (bytes.Length != Size) {
 			throw new ArgumentException("The byte span must contain exactly 32 bytes.", nameof(bytes));
+		}
 
 		bytes.CopyTo(val);
 	}

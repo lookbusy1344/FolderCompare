@@ -26,36 +26,45 @@ public class VersionInfo
 
 	public string GetHash(int? len = null)
 	{
-		if (string.IsNullOrEmpty(Version) && string.IsNullOrEmpty(GitHash))
+		if (string.IsNullOrEmpty(Version) && string.IsNullOrEmpty(GitHash)) {
 			return "(unknown)";
+		}
 
 		GitHash ??= string.Empty;
 
-		if (len == null)
+		if (len == null) {
 			return GitHash;
-		else
+		} else {
 			return $"{GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
+		}
 	}
 
 	public string GetVersionHash(int? len = null)
 	{
-		if (string.IsNullOrEmpty(Version) && string.IsNullOrEmpty(GitHash))
+		if (string.IsNullOrEmpty(Version) && string.IsNullOrEmpty(GitHash)) {
 			return "(unknown)";
+		}
 
 		GitHash ??= string.Empty;
 
-		if (len == null)
+		if (len == null) {
 			return $"v{Version} - {GitHash}";
-		else
+		} else {
 			return $"v{Version} - {GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
+		}
 	}
 
 	public static VersionInfo Get()
 	{
 		var assembly = Assembly.GetExecutingAssembly();
-		if (assembly == null) return VersionInfo.Empty;
+		if (assembly == null) {
+			return VersionInfo.Empty;
+		}
+
 		var verinfo = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-		if (verinfo == null) return VersionInfo.Empty;
+		if (verinfo == null) {
+			return VersionInfo.Empty;
+		}
 
 		var items = verinfo.InformationalVersion.Split('+', 2);
 		var version = items[0];

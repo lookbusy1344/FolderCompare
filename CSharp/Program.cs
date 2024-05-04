@@ -17,36 +17,47 @@ internal static class Program
 	private static async Task ProcessParsedArgsAsync(CliOptions opts)
 	{
 		var info = GitVersion.VersionInfo.Get();
-		if (!opts.Raw)
+		if (!opts.Raw) {
 			Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
+		}
 
 		var path1 = opts.FolderA!.FullName;
 		var path2 = opts.FolderB!.FullName;
 
-		if (path1 == path2) throw new Exception("The two folders must be different");
-		if (!opts.FolderA.Exists) throw new Exception($"Folder {path1} does not exist");
-		if (!opts.FolderB.Exists) throw new Exception($"Folder {path2} does not exist");
+		if (path1 == path2) {
+			throw new Exception("The two folders must be different");
+		}
+
+		if (!opts.FolderA.Exists) {
+			throw new Exception($"Folder {path1} does not exist");
+		}
+
+		if (!opts.FolderB.Exists) {
+			throw new Exception($"Folder {path2} does not exist");
+		}
 
 		// we need two comparers because we enumerate both folders in parallel
 		var comparer1 = BuildComparer(opts.Compare);
 		var comparer2 = BuildComparer(opts.Compare);
 
-		if (!opts.Raw)
+		if (!opts.Raw) {
 			Console.WriteLine($"Comparing \"{path1}\" and \"{path2}\" using {opts.Compare} comparison...");
+		}
 
 		HashSet<FileData> files1, files2;
-		if (opts.OneThread)
-		{
-			if (!opts.Raw)
+		if (opts.OneThread) {
+			if (!opts.Raw) {
 				Console.WriteLine($"Scanning {path1}...");
+			}
+
 			files1 = ScanFolder(opts.FolderA, !opts.Raw, comparer1);
 
-			if (!opts.Raw)
+			if (!opts.Raw) {
 				Console.WriteLine($"Scanning {path2}...");
+			}
+
 			files2 = ScanFolder(opts.FolderB, !opts.Raw, comparer2);
-		}
-		else
-		{
+		} else {
 			// scan both folders in parallel
 			var task1 = Task.Run(() => ScanFolder(opts.FolderA, false, comparer1));
 			var task2 = Task.Run(() => ScanFolder(opts.FolderB, false, comparer2));
@@ -58,16 +69,21 @@ internal static class Program
 			files2 = result[1];
 		}
 
-		if (files1.Count == 0) throw new Exception($"No files found in {path1}");
-		if (files2.Count == 0) throw new Exception($"No files found in {path2}");
+		if (files1.Count == 0) {
+			throw new Exception($"No files found in {path1}");
+		}
+
+		if (files2.Count == 0) {
+			throw new Exception($"No files found in {path2}");
+		}
 
 		var c1 = CompareSets(files1, files2, path1, path2, comparer1, opts.Raw);
 		var c2 = 0;
-		if (!opts.FirstOnly)
+		if (!opts.FirstOnly) {
 			c2 = CompareSets(files2, files1, path2, path1, comparer1, opts.Raw);
+		}
 
-		if (!opts.Raw)
-		{
+		if (!opts.Raw) {
 			Console.WriteLine();
 			Console.WriteLine($"There are {c1 + c2} differences");
 		}
@@ -80,15 +96,13 @@ internal static class Program
 	{
 		var folderAOption = new Option<DirectoryInfo>(
 			aliases: ["-a", "--foldera"],
-			description: "Folder A to search")
-		{
+			description: "Folder A to search") {
 			IsRequired = true
 		};
 
 		var folderBOption = new Option<DirectoryInfo>(
 			aliases: ["-b", "--folderb"],
-			description: "Folder B to search")
-		{
+			description: "Folder B to search") {
 			IsRequired = true
 		};
 
@@ -124,10 +138,8 @@ internal static class Program
 		// this was simpler, but theres a risk of mixing up the params
 		// rootCommand.SetHandler(ProcessParsedArgs, folderAOption, folderBOption, comparisonOption, onethreadFlag, rawFlag, firstonlyFlag);
 
-		rootCommand.SetHandler(async context =>
-		{
-			try
-			{
+		rootCommand.SetHandler(async context => {
+			try {
 				// build the options object
 				var cliopts = new CliOptions(
 					FolderA: context.ParseResult.GetValueForOption(folderAOption),
@@ -141,8 +153,7 @@ internal static class Program
 				await ProcessParsedArgsAsync(cliopts);
 				context.ExitCode = 0;
 			}
-			catch (Exception ex)
-			{
+			catch (Exception ex) {
 				Console.WriteLine($"ERROR: {ex.Message}");
 				context.ExitCode = 1;
 			}
@@ -154,8 +165,7 @@ internal static class Program
 	/// <summary>
 	/// Build the required comparer
 	/// </summary>
-	private static IEqualityComparer<FileData> BuildComparer(ComparisonType t) => t switch
-	{
+	private static IEqualityComparer<FileData> BuildComparer(ComparisonType t) => t switch {
 		ComparisonType.NameSize => new FileDataNameSizeComparer(),
 		ComparisonType.Name => new FileDataNameComparer(),
 		ComparisonType.Hash => new FileDataHashComparer(),
@@ -172,18 +182,17 @@ internal static class Program
 			.OrderBy(f => f.Name);
 
 		var count = 0;
-		if (!raw)
-		{
+		if (!raw) {
 			Console.WriteLine();
 			Console.WriteLine($"Files in \"{path1}\" but not in \"{path2}\":");
 		}
-		foreach (var file in difference)
-		{
+		foreach (var file in difference) {
 			Console.WriteLine(file.Path);
 			++count;
 		}
-		if (count == 0 && !raw)
+		if (count == 0 && !raw) {
 			Console.WriteLine("None");
+		}
 
 		return count;
 	}
@@ -200,10 +209,8 @@ internal static class Program
 		var files = Directory.GetFiles(path, "*", new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true });
 		var fileset = new HashSet<FileData>(files.Length, comparer);
 
-		foreach (var file in files)
-		{
-			try
-			{
+		foreach (var file in files) {
+			try {
 				var name = Path.GetFileName(file);
 				var filePath = Path.GetFullPath(file);
 				var size = usesize ? new FileInfo(file).Length : 0;
@@ -211,11 +218,11 @@ internal static class Program
 
 				var data = new FileData(name, filePath, size, hash);
 				var added = fileset.Add(data);
-				if (flagduplicates && !added)
+				if (flagduplicates && !added) {
 					Console.Error.WriteLine($"Duplicate file found: {data.Name}");
+				}
 			}
-			catch (Exception ex)
-			{
+			catch (Exception ex) {
 				Console.Error.WriteLine($"Error accessing file {file}: {ex.Message}");
 			}
 		}
