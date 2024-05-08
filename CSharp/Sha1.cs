@@ -6,11 +6,16 @@
 [System.Diagnostics.DebuggerDisplay("{this.ToString()}")]
 public readonly record struct Sha1Value
 {
+	/// <summary>
+	/// Size in bytes of the hash
+	/// </summary>
+	private const int SizeInBytes = 20;
+
 #pragma warning disable CA1815, IDE0051, IDE0044    // warnings related to inline arrays, nothing significant                                                             
 	/// <summary>
 	/// A struct containing an inline array of 20 bytes, large enough for a SHA1 hash
 	/// </summary>
-	[System.Runtime.CompilerServices.InlineArray(Size)]
+	[System.Runtime.CompilerServices.InlineArray(SizeInBytes)]
 	private struct InnerSha1
 	{
 		private byte _element0;
@@ -18,26 +23,21 @@ public readonly record struct Sha1Value
 #pragma warning restore CA1815, IDE0051, IDE0044
 
 	/// <summary>
-	/// Empty value, all 0 bytes
-	/// </summary>
-	public static readonly Sha1Value Empty;
-
-	/// <summary>
-	/// Size in bytes of the hash
-	/// </summary>
-	public const int Size = 20;
-
-	/// <summary>
 	/// The inline array of 20 bytes
 	/// </summary>
 	private readonly InnerSha1 val;
+
+	/// <summary>
+	/// Empty value, all 0 bytes
+	/// </summary>
+	public static readonly Sha1Value Empty;
 
 	/// <summary>
 	/// Inline arrays lack automatic value semantics (like normal arrays), so we need to implement them manually
 	/// </summary>
 	public readonly bool Equals(Sha1Value other)
 	{
-		for (var i = 0; i < Size; i++) {
+		for (var i = 0; i < SizeInBytes; i++) {
 			if (val[i] != other.val[i]) {
 				return false;
 			}
@@ -53,7 +53,7 @@ public readonly record struct Sha1Value
 	/// </summary>
 	public Sha1Value(ReadOnlySpan<byte> bytes)
 	{
-		if (bytes.Length != Size) {
+		if (bytes.Length != SizeInBytes) {
 			throw new ArgumentException("The byte span must contain exactly 20 bytes.", nameof(bytes));
 		}
 
