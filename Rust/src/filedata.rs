@@ -8,14 +8,14 @@ use strum::EnumString;
 
 /// convert comparison string into an instance of `FileDataCompareOption`
 pub fn parse_comparer(
-    compstr: &Option<String>,
+    comparer_str: &Option<String>,
 ) -> Result<FileDataCompareOption, strum::ParseError> {
-    if compstr.is_none() || compstr.as_ref().unwrap().is_empty() {
+    if comparer_str.is_none() || comparer_str.as_ref().unwrap().is_empty() {
         // use the default
         return Ok(FileDataCompareOption::Name);
     }
 
-    FileDataCompareOption::from_str(compstr.as_ref().unwrap())
+    FileDataCompareOption::from_str(comparer_str.as_ref().unwrap())
 }
 
 // =================================================================================================

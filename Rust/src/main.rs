@@ -43,31 +43,31 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
     let files2;
 
     // scan the folders and populate the HashSets
-    if config.onethread {
+    if config.one_thread {
         // scan the two folders in series, using one thread
         files1 = scan_folder(config, &config.folder1)?;
         files2 = scan_folder(config, &config.folder2)?;
     } else {
         // scan them in parallel
-        let (resfiles1, resfiles2) = rayon::join(
+        let (res_files_1, res_files_2) = rayon::join(
             || scan_folder(config, &config.folder1),
             || scan_folder(config, &config.folder2),
         );
 
-        files1 = resfiles1?;
-        files2 = resfiles2?;
+        files1 = res_files_1?;
+        files2 = res_files_2?;
     }
 
-    // find whats in files1, but not in files2
+    // find what's in files1, but not in files2
     let diff1 = hashmap_difference(&files1, &files2);
     show_results(&diff1, &config.folder1, &config.folder2, config.raw);
 
     // count the differences
-    let count = if config.firstonly {
-        // we dont care about the second stage, just yield the first count
+    let count = if config.first_only {
+        // we don't care about the second stage, just yield the first count
         diff1.len()
     } else {
-        // find whats in files2, but not in files1
+        // find what's in files2, but not in files1
         let diff2 = hashmap_difference(&files2, &files1);
         show_results(&diff2, &config.folder2, &config.folder1, config.raw);
 
@@ -94,12 +94,12 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
 }
 
 /// Show the results of the comparison
-fn show_results(differences: &Vec<&FileData>, presentindir: &Path, absentindir: &Path, raw: bool) {
+fn show_results(differences: &Vec<&FileData>, present_in_dir: &Path, absent_in_dir: &Path, raw: bool) {
     if !raw {
         println!(
             "Files in '{}' but not in '{}'",
-            presentindir.display(),
-            absentindir.display()
+            present_in_dir.display(),
+            absent_in_dir.display()
         );
         if differences.is_empty() {
             println!("None");
@@ -119,25 +119,25 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
-            let fname = entry.file_name().to_str().unwrap().to_string();
-            let fpath = entry.path().to_str().unwrap().to_string();
-            let fsize = entry.metadata().unwrap().len();
+            let file_name = entry.file_name().to_str().unwrap().to_string();
+            let file_path = entry.path().to_str().unwrap().to_string();
+            let file_size = entry.metadata().unwrap().len();
 
             // generate the SHA2 key according to the comparison option
             let key = match config.comparer {
-                FileDataCompareOption::Name => hash_string::<sha2::Sha256>(fname.as_str()),
+                FileDataCompareOption::Name => hash_string::<sha2::Sha256>(file_name.as_str()),
                 FileDataCompareOption::NameSize => {
-                    hash_string_and_size::<sha2::Sha256>(fname.as_str(), fsize)
+                    hash_string_and_size::<sha2::Sha256>(file_name.as_str(), file_size)
                 }
-                FileDataCompareOption::Hash => hash_file::<sha2::Sha256>(fpath.as_str())?,
+                FileDataCompareOption::Hash => hash_file::<sha2::Sha256>(file_path.as_str())?,
             };
 
             fileset.insert(
                 key,
                 FileData {
-                    filename: fname,
-                    size: fsize,
-                    path: fpath,
+                    filename: file_name,
+                    size: file_size,
+                    path: file_path,
                 },
             );
         }

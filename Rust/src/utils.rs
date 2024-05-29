@@ -35,8 +35,8 @@ pub struct Config {
     pub folder2: PathBuf,
     pub comparer: FileDataCompareOption, // how to compare files, Name, NameSize or Hash
     pub raw: bool,                       // raw output, for piping
-    pub firstonly: bool, // only show files in folder A missing from folder B (default is both)
-    pub onethread: bool, // only use one thread, don't scan folders in parallel
+    pub first_only: bool, // only show files in folder A missing from folder B (default is both)
+    pub one_thread: bool, // only use one thread, don't scan folders in parallel
 }
 
 /// Hash a file using the given hasher as a Digest implementation
@@ -116,12 +116,12 @@ pub fn parse_args() -> anyhow::Result<Config> {
 
     let path1: String = pargs.value_from_str(["-a", "--foldera"])?;
     let path2: String = pargs.value_from_str(["-b", "--folderb"])?;
-    let compstr: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
-    let compareropt = parse_comparer(&compstr);
+    let comparer_str: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
+    let comparer_res = parse_comparer(&comparer_str);
 
     // additional validation
 
-    if compareropt.is_err() {
+    if comparer_res.is_err() {
         return Err(anyhow::anyhow!(
             "Comparison should be Name, NameSize or Hash"
         ));
@@ -132,10 +132,10 @@ pub fn parse_args() -> anyhow::Result<Config> {
     let config = Config {
         folder1: Path::new(&path1).canonicalize()?,
         folder2: Path::new(&path2).canonicalize()?,
-        comparer: compareropt.unwrap(),
+        comparer: comparer_res.unwrap(),
         raw,
-        firstonly: pargs.contains(["-f", "--first-only"]),
-        onethread: pargs.contains(["-o", "--one-thread"]),
+        first_only: pargs.contains(["-f", "--first-only"]),
+        one_thread: pargs.contains(["-o", "--one-thread"]),
     };
 
     // Check for unused arguments, and error out if there are any
