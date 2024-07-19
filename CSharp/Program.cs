@@ -128,17 +128,7 @@ internal static class Program
 		return new Config(new DirectoryInfo(foldera), new DirectoryInfo(folderb), ParseType(comparisonStr), raw, oneThread, firstOnly);
 	}
 
-	private static ComparisonType ParseType(string? s)
-	{
-		if (string.IsNullOrEmpty(s)) {
-			return ComparisonType.Name;
-		}
-		if (Enum.TryParse(s, true, out ComparisonType result)) {
-			return result;
-		} else {
-			return ComparisonType.Name;
-		}
-	}
+	private static ComparisonType ParseType(string? s) => Enum.TryParse(s, true, out ComparisonType result) ? result : ComparisonType.Name;
 
 	/// <summary>
 	/// Build the required comparer
