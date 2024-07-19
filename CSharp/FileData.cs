@@ -12,19 +12,6 @@ public enum ComparisonType
 	Hash
 }
 
-public record class CliOptionsx(DirectoryInfo? FolderA, DirectoryInfo? FolderB, ComparisonType Compare, bool OneThread, bool Raw, bool FirstOnly)
-{
-	public virtual bool Equals(CliOptionsx? other) => other != null
-		&& FolderA?.FullName == other.FolderA?.FullName
-		&& FolderB?.FullName == other.FolderB?.FullName
-		&& Compare == other.Compare
-		&& OneThread == other.OneThread
-		&& Raw == other.Raw
-		&& FirstOnly == other.FirstOnly;
-
-	public override int GetHashCode() => HashCode.Combine(FolderA?.FullName, FolderB?.FullName, Compare, OneThread, Raw, FirstOnly);
-}
-
 /// <summary>
 /// Record holding information about a file
 /// </summary>

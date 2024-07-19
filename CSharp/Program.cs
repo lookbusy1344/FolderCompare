@@ -4,39 +4,14 @@ namespace FolderCompare;
 
 internal static class Program
 {
-	public static int Main(string[] args)
+	public static async Task<int> Main(string[] args)
 	{
 		AppDomain.CurrentDomain.UnhandledException += App_UnhandledException;
 
-		var config = BuildRootCommand(args);
+		var opts = ParseCommandLine(args);
 
-		return rootCommand.Invoke(args);
-	}
-
-	/// <summary>
-	/// Global exception handler (for unhandled exceptions)
-	/// </summary>
-	private static void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-	{
-		Console.WriteLine();
-		if (e.ExceptionObject is Exception ex) {
-			Console.WriteLine($"ERROR: {ex.Message}");
-		} else {
-			Console.WriteLine($"ERROR value: {0}", e.ExceptionObject?.ToString() ?? "?");
-		}
-
-		Console.WriteLine();
-		Console.WriteLine(CommandLineMessage);
-		Environment.Exit(1);
-	}
-
-	/// <summary>
-	/// Handle the parsed command line arguments
-	/// </summary>
-	private static async Task ProcessParsedArgsAsync(CliOptions opts)
-	{
-		var info = GitVersion.VersionInfo.Get();
 		if (!opts.Raw) {
+			var info = GitVersion.VersionInfo.Get();
 			Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
 		}
 
@@ -106,12 +81,31 @@ internal static class Program
 			Console.WriteLine();
 			Console.WriteLine($"There are {c1 + c2} differences");
 		}
+
+		return 0;
+	}
+
+	/// <summary>
+	/// Global exception handler (for unhandled exceptions)
+	/// </summary>
+	private static void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+	{
+		Console.WriteLine();
+		if (e.ExceptionObject is Exception ex) {
+			Console.WriteLine($"ERROR: {ex.Message}");
+		} else {
+			Console.WriteLine($"ERROR value: {0}", e.ExceptionObject?.ToString() ?? "?");
+		}
+
+		Console.WriteLine();
+		Console.WriteLine(CommandLineMessage);
+		Environment.Exit(1);
 	}
 
 	/// <summary>
 	/// Parse the command line info
 	/// </summary>
-	private static Config BuildRootCommand(string[] args)
+	private static Config ParseCommandLine(string[] args)
 	{
 		var pico = new PicoArgs(args);
 
