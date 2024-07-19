@@ -12,9 +12,9 @@ public enum ComparisonType
 	Hash
 }
 
-public record class CliOptions(DirectoryInfo? FolderA, DirectoryInfo? FolderB, ComparisonType Compare, bool OneThread, bool Raw, bool FirstOnly)
+public record class CliOptionsx(DirectoryInfo? FolderA, DirectoryInfo? FolderB, ComparisonType Compare, bool OneThread, bool Raw, bool FirstOnly)
 {
-	public virtual bool Equals(CliOptions? other) => other != null
+	public virtual bool Equals(CliOptionsx? other) => other != null
 		&& FolderA?.FullName == other.FolderA?.FullName
 		&& FolderB?.FullName == other.FolderB?.FullName
 		&& Compare == other.Compare

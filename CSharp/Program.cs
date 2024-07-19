@@ -1,5 +1,4 @@
-﻿using System.CommandLine;
-using System.CommandLine.Parsing;
+﻿using PicoArgs_dotnet;
 
 namespace FolderCompare;
 
@@ -7,8 +6,28 @@ internal static class Program
 {
 	public static int Main(string[] args)
 	{
-		var rootCommand = BuildRootCommand();
+		AppDomain.CurrentDomain.UnhandledException += App_UnhandledException;
+
+		var config = BuildRootCommand(args);
+
 		return rootCommand.Invoke(args);
+	}
+
+	/// <summary>
+	/// Global exception handler (for unhandled exceptions)
+	/// </summary>
+	private static void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+	{
+		Console.WriteLine();
+		if (e.ExceptionObject is Exception ex) {
+			Console.WriteLine($"ERROR: {ex.Message}");
+		} else {
+			Console.WriteLine($"ERROR value: {0}", e.ExceptionObject?.ToString() ?? "?");
+		}
+
+		Console.WriteLine();
+		Console.WriteLine(CommandLineMessage);
+		Environment.Exit(1);
 	}
 
 	/// <summary>
@@ -90,76 +109,41 @@ internal static class Program
 	}
 
 	/// <summary>
-	/// Set up the root command for parsing CLI arguments
+	/// Parse the command line info
 	/// </summary>
-	private static RootCommand BuildRootCommand()
+	private static Config BuildRootCommand(string[] args)
 	{
-		var folderAOption = new Option<DirectoryInfo>(
-			aliases: ["-a", "--foldera"],
-			description: "Folder A to search") {
-			IsRequired = true
-		};
+		var pico = new PicoArgs(args);
 
-		var folderBOption = new Option<DirectoryInfo>(
-			aliases: ["-b", "--folderb"],
-			description: "Folder B to search") {
-			IsRequired = true
-		};
+		// handle help
+		if (pico.Contains("-h", "--help", "-?")) {
+			Console.WriteLine(CommandLineMessage);
+			Environment.Exit(0);
+		}
 
-		var comparisonOption = new Option<ComparisonType>(
-			aliases: ["-c", "--comparison"],
-			getDefaultValue: () => ComparisonType.Name,
-			description: "Comparison type: name, namesize, hash");
+		var foldera = pico.GetParam("-a", "--foldera");
+		var folderb = pico.GetParam("-b", "--folderb");
+		var comparisonStr = pico.GetParamOpt("-c", "--comparison");
 
-		var onethreadFlag = new Option<bool>(
-			aliases: ["-o", "--one-thread"],
-			getDefaultValue: () => false,
-			description: "Use only one thread");
+		var raw = pico.Contains("-r", "--raw");
+		var oneThread = pico.Contains("-o", "--one-thread");
+		var firstOnly = pico.Contains("-f", "--first-only");
 
-		var rawFlag = new Option<bool>(
-			aliases: ["-r", "--raw"],
-			getDefaultValue: () => false,
-			description: "Raw output, for piping");
+		pico.Finished();
 
-		var firstonlyFlag = new Option<bool>(
-			aliases: ["-f", "--first-only"],
-			getDefaultValue: () => false,
-			description: "Only show files in A missing in B");
+		return new Config(new DirectoryInfo(foldera), new DirectoryInfo(folderb), ParseType(comparisonStr), raw, oneThread, firstOnly);
+	}
 
-		var ver = GitVersion.VersionInfo.Get();
-		var rootCommand = new RootCommand($"FolderCompare .NET {ver.GetVersionHash(20)}");
-		rootCommand.AddOption(folderAOption);
-		rootCommand.AddOption(folderBOption);
-		rootCommand.AddOption(comparisonOption);
-		rootCommand.AddOption(onethreadFlag);
-		rootCommand.AddOption(rawFlag);
-		rootCommand.AddOption(firstonlyFlag);
-
-		// this was simpler, but theres a risk of mixing up the params
-		// rootCommand.SetHandler(ProcessParsedArgs, folderAOption, folderBOption, comparisonOption, onethreadFlag, rawFlag, firstonlyFlag);
-
-		rootCommand.SetHandler(async context => {
-			try {
-				// build the options object
-				var cliopts = new CliOptions(
-					FolderA: context.ParseResult.GetValueForOption(folderAOption),
-					FolderB: context.ParseResult.GetValueForOption(folderBOption),
-					Compare: context.ParseResult.GetValueForOption(comparisonOption),
-					OneThread: context.ParseResult.GetValueForOption(onethreadFlag),
-					Raw: context.ParseResult.GetValueForOption(rawFlag),
-					FirstOnly: context.ParseResult.GetValueForOption(firstonlyFlag));
-
-				// and process it
-				await ProcessParsedArgsAsync(cliopts);
-				context.ExitCode = 0;
-			}
-			catch (Exception ex) {
-				Console.WriteLine($"ERROR: {ex.Message}");
-				context.ExitCode = 1;
-			}
-		});
-
-		return rootCommand;
+	private static ComparisonType ParseType(string? s)
+	{
+		if (string.IsNullOrEmpty(s)) {
+			return ComparisonType.Name;
+		}
+		if (Enum.TryParse(s, true, out ComparisonType result)) {
+			return result;
+		} else {
+			return ComparisonType.Name;
+		}
 	}
 
 	/// <summary>
@@ -229,4 +213,20 @@ internal static class Program
 
 		return fileset;
 	}
+
+	private const string CommandLineMessage = """
+		Usage: FolderCompare.exe --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
+
+		Required:
+		  -a, --foldera <folder>    Folder A to compare
+		  -b, --folderb <folder>    Folder B to compare
+
+		Options:
+		  -c, --comparison <type>    Comparison type: name, namesize, hash (default is name)
+
+		  -h, --help                 Show this help
+		  -r, --raw                  Raw output, for piping
+		  -o, --one-thread           Use only one thread
+		  -f, --first-only           Only show files in A missing in B
+		""";
 }
