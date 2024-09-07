@@ -51,6 +51,4 @@ pub enum FileDataCompareOption {
 
 /// Represents a file, with name, pathname, size and optional hash. U is the type of comparison
 #[derive(Debug, Clone)]
-pub struct FileData {
-    pub path: String,
-}
+pub struct FileData(pub String);

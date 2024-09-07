@@ -106,7 +106,7 @@ fn show_results(differences: &Vec<&FileData>, present_in_dir: &Path, absent_in_d
         }
     }
     for f in differences {
-        println!("{}", f.path);
+        println!("{}", f.0);
     }
     if !raw {
         println!();
@@ -134,9 +134,7 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
 
             fileset.insert(
                 key,
-                FileData {
-                    path: file_path,
-                },
+                FileData(file_path),
             );
         }
     }
