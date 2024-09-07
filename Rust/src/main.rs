@@ -135,8 +135,6 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
             fileset.insert(
                 key,
                 FileData {
-                    filename: file_name,
-                    size: file_size,
                     path: file_path,
                 },
             );
