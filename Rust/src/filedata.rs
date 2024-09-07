@@ -10,12 +10,10 @@ use strum::EnumString;
 pub fn parse_comparer(
     comparer_str: &Option<String>,
 ) -> Result<FileDataCompareOption, strum::ParseError> {
-    if comparer_str.is_none() || comparer_str.as_ref().unwrap().is_empty() {
-        // use the default
-        return Ok(FileDataCompareOption::Name);
+    match comparer_str {
+        Some(s) if !s.is_empty() => FileDataCompareOption::from_str(s), // a non-empty string
+        _ => Ok(FileDataCompareOption::Name), // otherwise, use the default
     }
-
-    FileDataCompareOption::from_str(comparer_str.as_ref().unwrap())
 }
 
 // =================================================================================================
