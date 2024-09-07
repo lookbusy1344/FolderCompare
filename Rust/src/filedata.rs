@@ -52,3 +52,19 @@ impl Display for FilePath {
         write!(f, "{}", self.0)
     }
 }
+
+// Converting a String and &str into a FilePath
+
+impl From<String> for FilePath {
+    // this moves the specified string into the FilePath struct
+    fn from(s: String) -> Self {
+        FilePath(s)
+    }
+}
+
+impl From<&str> for FilePath {
+    fn from(s: &str) -> Self {
+        // this clones the specified string slice
+        FilePath(s.to_string())
+    }
+}
