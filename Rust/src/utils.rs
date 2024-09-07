@@ -6,7 +6,7 @@ use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 
 use crate::filedata::{FileDataCompareOption, Sha2Value};
-use crate::{parse_comparer, FileData};
+use crate::{parse_comparer, FilePath};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=+"]);
@@ -149,9 +149,9 @@ pub fn parse_args() -> anyhow::Result<Config> {
 
 /// Scan A and return a vector of the records not found in B
 pub fn hashmap_difference<'a>(
-    a: &'a HashMap<Sha2Value, FileData>,
-    b: &'a HashMap<Sha2Value, FileData>,
-) -> Vec<&'a FileData> {
+    a: &'a HashMap<Sha2Value, FilePath>,
+    b: &'a HashMap<Sha2Value, FilePath>,
+) -> Vec<&'a FilePath> {
     let mut diff = Vec::new();
     for (k, v) in a {
         if !b.contains_key(k) {

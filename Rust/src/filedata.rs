@@ -1,10 +1,6 @@
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use strum::EnumString;
-
-// FileData struct and associated trait implementations
-// This struct can be used to compare files by name, name and size, or name and hash
-// According to a comparison marker struct (UniqueName, UniqueNameSize, UniqueHash)
-// Those markers must implement the UniqueTrait trait, as well as Eq, PartialEq and Hash
 
 /// convert comparison string into an instance of `FileDataCompareOption`
 pub fn parse_comparer(
@@ -47,8 +43,12 @@ pub enum FileDataCompareOption {
     Hash,
 }
 
-// Implementations for FileData and the various comparison options
-
-/// Represents a file, with name, pathname, size and optional hash. U is the type of comparison
+/// Represents a file path
 #[derive(Debug, Clone)]
-pub struct FileData(pub String);
+pub struct FilePath(pub String);
+
+impl Display for FilePath {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}

@@ -94,7 +94,7 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
 }
 
 /// Show the results of the comparison
-fn show_results(differences: &Vec<&FileData>, present_in_dir: &Path, absent_in_dir: &Path, raw: bool) {
+fn show_results(differences: &Vec<&FilePath>, present_in_dir: &Path, absent_in_dir: &Path, raw: bool) {
     if !raw {
         println!(
             "Files in '{}' but not in '{}'",
@@ -106,7 +106,7 @@ fn show_results(differences: &Vec<&FileData>, present_in_dir: &Path, absent_in_d
         }
     }
     for f in differences {
-        println!("{}", f.0);
+        println!("{}", f);
     }
     if !raw {
         println!();
@@ -114,8 +114,8 @@ fn show_results(differences: &Vec<&FileData>, present_in_dir: &Path, absent_in_d
 }
 
 /// Scan a folder and build hashset with the files
-fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value, FileData>> {
-    let mut fileset: HashMap<Sha2Value, FileData> = HashMap::with_capacity(200);
+fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value, FilePath>> {
+    let mut fileset: HashMap<Sha2Value, FilePath> = HashMap::with_capacity(200);
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
@@ -134,7 +134,7 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
 
             fileset.insert(
                 key,
-                FileData(file_path),
+                FilePath(file_path),
             );
         }
     }
