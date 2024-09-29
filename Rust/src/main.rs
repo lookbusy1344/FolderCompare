@@ -119,19 +119,23 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value,
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
-            let file_name = entry.file_name().to_str().unwrap().to_string();
             let file_path = entry.path().to_str().unwrap().to_string();
-            let file_size = entry.metadata().unwrap().len();
 
             // generate the SHA2 key according to the comparison option
             let key = match config.comparer {
-                FileDataCompareOption::Name => hash_string::<sha2::Sha256>(file_name.as_str()),
+                FileDataCompareOption::Name => {
+                    let file_name = entry.file_name().to_str().unwrap().to_string();
+                    hash_string::<sha2::Sha256>(file_name.as_str())
+                }
                 FileDataCompareOption::NameSize => {
+                    let file_name = entry.file_name().to_str().unwrap().to_string();
+                    let file_size = entry.metadata()?.len();
                     hash_string_and_size::<sha2::Sha256>(file_name.as_str(), file_size)
                 }
                 FileDataCompareOption::Hash => hash_file::<sha2::Sha256>(file_path.as_str())?,
             };
 
+            // insert the file into the hashset, with required key
             fileset.insert(
                 key,
                 file_path.into(),
