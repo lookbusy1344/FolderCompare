@@ -17,7 +17,7 @@ pub fn parse_comparer(
 // A struct to hold the hash value, without the overhead of a String. 32 bytes long
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Sha2Hash {
-    pub hash: [u8; 32],
+    hash: [u8; 32],
 }
 
 impl Sha2Hash {
@@ -27,6 +27,11 @@ impl Sha2Hash {
         hash.copy_from_slice(slice);    // this automatically checks the length of slice is correct
         Sha2Hash { hash }
     }
+
+    // /// Get the hash as a immutable slice
+    // pub fn as_slice(&self) -> &[u8] {
+    //     &self.hash
+    // }
 }
 
 impl Display for Sha2Hash {
