@@ -24,8 +24,17 @@ impl Sha2Value {
     /// Create a new `Sha2Value` from a u8 slice
     pub fn new(slice: &[u8]) -> Self {
         let mut hash = [0u8; 32];
-        hash.copy_from_slice(slice);
+        hash.copy_from_slice(slice);    // this automatically checks the length of slice is correct
         Sha2Value { hash }
+    }
+}
+
+impl Display for Sha2Value {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for byte in self.hash {
+            write!(f, "{:02x}", byte)?;
+        }
+        Ok(())
     }
 }
 
@@ -55,12 +64,12 @@ impl Display for FilePath {
 
 // Converting a String and &str into a FilePath
 
-impl From<String> for FilePath {
-    // this moves the specified string into the FilePath struct
-    fn from(s: String) -> Self {
-        FilePath(s)
-    }
-}
+// impl From<String> for FilePath {
+//     // this moves the specified string into the FilePath struct
+//     fn from(s: String) -> Self {
+//         FilePath(s)
+//     }
+// }
 
 impl From<&str> for FilePath {
     fn from(s: &str) -> Self {
