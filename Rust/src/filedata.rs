@@ -14,22 +14,22 @@ pub fn parse_comparer(
 
 // =================================================================================================
 
-// A struct to hold the hash value, without the overhead of a String
+// A struct to hold the hash value, without the overhead of a String. 32 bytes long
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Sha2Value {
+pub struct Sha2Hash {
     pub hash: [u8; 32],
 }
 
-impl Sha2Value {
-    /// Create a new `Sha2Value` from a u8 slice
+impl Sha2Hash {
+    /// Create a new `Sha2Hash` from a u8 slice
     pub fn new(slice: &[u8]) -> Self {
         let mut hash = [0u8; 32];
         hash.copy_from_slice(slice);    // this automatically checks the length of slice is correct
-        Sha2Value { hash }
+        Sha2Hash { hash }
     }
 }
 
-impl Display for Sha2Value {
+impl Display for Sha2Hash {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for byte in self.hash {
             write!(f, "{:02x}", byte)?;

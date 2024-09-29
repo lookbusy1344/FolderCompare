@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 
-use crate::filedata::{FileDataCompareOption, Sha2Value};
+use crate::filedata::{FileDataCompareOption, Sha2Hash};
 use crate::{parse_comparer, FilePath};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
@@ -40,10 +40,10 @@ pub struct Config {
 }
 
 /// Hash a file using the given hasher as a Digest implementation
-/// Returns a `Sha2Value`, which is a wrapper around a [u8; 32]
+/// Returns a `Sha2Hash`, which is a wrapper around a [u8; 32]
 /// # Errors
 /// Will return an error if the file cannot be opened or read
-pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<Sha2Value> {
+pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<Sha2Hash> {
     let file = File::open(filename)?;
     let mut reader = BufReader::new(file);
     let mut buffer = [0u8; FILE_BUFFER_SIZE];
@@ -59,43 +59,27 @@ pub fn hash_file<D: Digest>(filename: &str) -> anyhow::Result<Sha2Value> {
 
     let h = hasher.finalize();
 
-    Ok(Sha2Value::new(&h))
+    Ok(Sha2Hash::new(&h))
 }
 
-/// Hash a string slice and return a `Sha2Value`
-pub fn hash_string<D: Digest>(text: &str) -> Sha2Value {
+/// Hash a string slice and return a `Sha2Hash`
+pub fn hash_string<D: Digest>(text: &str) -> Sha2Hash {
     let mut hasher = D::new();
     hasher.update(text);
     let h = hasher.finalize();
 
-    Sha2Value::new(&h)
+    Sha2Hash::new(&h)
 }
 
-/// Hash a string slice and a size and return a `Sha2Value`
-pub fn hash_string_and_size<D: Digest>(text: &str, size: u64) -> Sha2Value {
+/// Hash a string slice and a size and return a `Sha2Hash`
+pub fn hash_string_and_size<D: Digest>(text: &str, size: u64) -> Sha2Hash {
     let mut hasher = D::new();
     hasher.update(text);
     hasher.update(size.to_le_bytes());
     let h = hasher.finalize();
 
-    Sha2Value::new(&h)
+    Sha2Hash::new(&h)
 }
-
-/*
-/// Hash a string slice using the given hasher as a Digest implementation
-/// Returns a `Sha2Value`, which is a wrapper around a [u8; 32]
-/// # Errors
-/// Will return an error if the file cannot be opened or read
-pub fn hash_str<D: Digest>(text: &str) -> anyhow::Result<Sha2Value> {
-    if text.is_empty() {
-        return Ok(Sha2Value::default());
-    }
-
-    let h = D::new().chain_update(text).finalize();
-
-    Ok(Sha2Value::new(&h))
-}
-*/
 
 pub fn parse_args() -> anyhow::Result<Config> {
     let mut pargs = pico_args::Arguments::from_env();
@@ -149,8 +133,8 @@ pub fn parse_args() -> anyhow::Result<Config> {
 
 /// Scan A and return a vector of the records not found in B
 pub fn hashmap_difference<'a>(
-    a: &'a HashMap<Sha2Value, FilePath>,
-    b: &'a HashMap<Sha2Value, FilePath>,
+    a: &'a HashMap<Sha2Hash, FilePath>,
+    b: &'a HashMap<Sha2Hash, FilePath>,
 ) -> Vec<&'a FilePath> {
     let mut diff = Vec::new();
     for (k, v) in a {

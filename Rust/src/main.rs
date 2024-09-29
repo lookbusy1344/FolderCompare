@@ -114,8 +114,8 @@ fn show_results(differences: &Vec<&FilePath>, present_in_dir: &Path, absent_in_d
 }
 
 /// Scan a folder and build hashset with the files
-fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Value, FilePath>> {
-    let mut fileset: HashMap<Sha2Value, FilePath> = HashMap::with_capacity(200);
+fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Hash, FilePath>> {
+    let mut fileset: HashMap<Sha2Hash, FilePath> = HashMap::with_capacity(200);
 
     for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
         if entry.file_type().is_file() {
