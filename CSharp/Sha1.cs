@@ -11,7 +11,7 @@ public readonly record struct Sha1Value
 	/// </summary>
 	private const int SizeInBytes = 20;
 
-#pragma warning disable CA1815, IDE0051, IDE0044    // warnings related to inline arrays, nothing significant                                                             
+#pragma warning disable CA1815, IDE0051, IDE0044, RCS1169, RCS1213    // warnings related to inline arrays, nothing significant                                                             
 	/// <summary>
 	/// A struct containing an inline array of 20 bytes, large enough for a SHA1 hash
 	/// </summary>
@@ -20,7 +20,7 @@ public readonly record struct Sha1Value
 	{
 		private byte _element0;
 	}
-#pragma warning restore CA1815, IDE0051, IDE0044
+#pragma warning restore CA1815, IDE0051, IDE0044, RCS1169, RCS1213
 
 	/// <summary>
 	/// The inline array of 20 bytes
