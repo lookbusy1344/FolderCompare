@@ -6,10 +6,10 @@ on:
     paths:
       - 'Rust/**'   # only fire when this folder changes
 
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - 'Rust/**'
+#  pull_request:
+#    branches: [ "main" ]
+#    paths:
+#      - 'Rust/**'
 
 env:
   CARGO_TERM_COLOR: always
