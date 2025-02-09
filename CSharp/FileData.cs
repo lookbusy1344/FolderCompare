@@ -24,10 +24,7 @@ public class FileDataNameSizeComparer : IEqualityComparer<FileData>
 {
 	public bool Equals(FileData x, FileData y) => x.Name == y.Name && x.Size == y.Size;
 
-	public int GetHashCode(FileData obj) =>
-		// Generate a hash code based on the Name and Size of the file data object
-		// or use a tuple:		(obj.Name, obj.Size).GetHashCode();
-		obj.Name.GetHashCode() ^ obj.Size.GetHashCode();
+	public int GetHashCode(FileData obj) => HashCode.Combine(obj.Name, obj.Size);
 }
 
 /// <summary>
@@ -47,7 +44,5 @@ public class FileDataHashComparer : IEqualityComparer<FileData>
 {
 	public bool Equals(FileData x, FileData y) => x.Hash == y.Hash && x.Size == y.Size;
 
-	public int GetHashCode(FileData obj) =>
-		// Generate a hash code based on the Name and Size of the file data object
-		obj.Hash.GetHashCode();
+	public int GetHashCode(FileData obj) => obj.Hash.GetHashCode();
 }
