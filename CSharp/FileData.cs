@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.ComponentModel.DataAnnotations;
 
 namespace FolderCompare;
 
@@ -20,29 +21,119 @@ public readonly record struct FileData(string Name, string Path, long Size, Sha2
 /// <summary>
 /// Compare two FileData objects based on their Name and Size properties
 /// </summary>
-public class FileDataNameSizeComparer : IEqualityComparer<FileData>
+public class FileDataNameSizeComparer : IEqualityComparer<FileData>, IEqualityComparer
 {
 	public bool Equals(FileData x, FileData y) => x.Name == y.Name && x.Size == y.Size;
 
 	public int GetHashCode(FileData obj) => HashCode.Combine(obj.Name, obj.Size);
+
+	public new bool Equals(object? x, object? y)
+	{
+		if (x == y) {
+			return true;
+		}
+
+		if (x == null || y == null) {
+			return false;
+		}
+
+		if (x is FileData a && y is FileData b) {
+			return Equals(a, b);
+		}
+
+		throw new ArgumentException("Types dont match", nameof(x));
+	}
+
+	public int GetHashCode(object obj)
+	{
+		if (obj == null) {
+			return 0;
+		}
+
+		if (obj is FileData x) {
+			return GetHashCode(x);
+		}
+
+		throw new ArgumentException("Incorrect type", nameof(obj));
+	}
 }
 
 /// <summary>
 /// Compare two FileData objects based on filename only
 /// </summary>
-public class FileDataNameComparer : IEqualityComparer<FileData>
+public class FileDataNameComparer : IEqualityComparer<FileData>, IEqualityComparer
 {
 	public bool Equals(FileData x, FileData y) => x.Name == y.Name;
 
 	public int GetHashCode(FileData obj) => obj.Name.GetHashCode();
+
+	public new bool Equals(object? x, object? y)
+	{
+		if (x == y) {
+			return true;
+		}
+
+		if (x == null || y == null) {
+			return false;
+		}
+
+		if (x is FileData a && y is FileData b) {
+			return Equals(a, b);
+		}
+
+		throw new ArgumentException("Types dont match", nameof(x));
+	}
+
+	public int GetHashCode(object obj)
+	{
+		if (obj == null) {
+			return 0;
+		}
+
+		if (obj is FileData x) {
+			return GetHashCode(x);
+		}
+
+		throw new ArgumentException("Incorrect type", nameof(obj));
+	}
 }
 
 /// <summary>
 /// Compare two FileData objects based on hashes
 /// </summary>
-public class FileDataHashComparer : IEqualityComparer<FileData>
+public class FileDataHashComparer : IEqualityComparer<FileData>, IEqualityComparer
 {
 	public bool Equals(FileData x, FileData y) => x.Hash == y.Hash && x.Size == y.Size;
 
 	public int GetHashCode(FileData obj) => obj.Hash.GetHashCode();
+
+	public new bool Equals(object? x, object? y)
+	{
+		if (x == y) {
+			return true;
+		}
+
+		if (x == null || y == null) {
+			return false;
+		}
+
+		if (x is FileData a && y is FileData b) {
+			return Equals(a, b);
+		}
+
+		throw new ArgumentException("Types dont match", nameof(x));
+	}
+
+	public int GetHashCode(object obj)
+	{
+		if (obj == null) {
+			return 0;
+		}
+
+		if (obj is FileData x) {
+			return GetHashCode(x);
+		}
+
+		throw new ArgumentException("Incorrect type", nameof(obj));
+	}
 }
