@@ -1,6 +1,6 @@
-﻿using PicoArgs_dotnet;
+﻿namespace FolderCompare;
 
-namespace FolderCompare;
+using PicoArgs_dotnet;
 
 internal static class Program
 {
