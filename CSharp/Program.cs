@@ -130,11 +130,15 @@ internal static class Program
 
 	private static ComparisonType ParseType(string? s)
 	{
+#pragma warning disable IDE0046 // Convert to conditional expression
 		if (string.IsNullOrEmpty(s)) {
 			return ComparisonType.Name;
 		}
+#pragma warning restore IDE0046 // Convert to conditional expression
 
-		return Enum.TryParse(s, true, out ComparisonType result) ? result : throw new Exception($"Invalid comparison type: {s}");
+		return Enum.TryParse(s, true, out ComparisonType result)
+			? result
+			: throw new Exception($"Invalid comparison type: {s}");
 	}
 
 	/// <summary>

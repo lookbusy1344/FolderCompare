@@ -32,11 +32,7 @@ public class VersionInfo
 
 		GitHash ??= string.Empty;
 
-		if (len == null) {
-			return GitHash;
-		} else {
-			return $"{GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
-		}
+		return len == null ? GitHash : $"{GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
 	}
 
 	public string GetVersionHash(int? len = null)
@@ -47,11 +43,7 @@ public class VersionInfo
 
 		GitHash ??= string.Empty;
 
-		if (len == null) {
-			return $"v{Version} - {GitHash}";
-		} else {
-			return $"v{Version} - {GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
-		}
+		return len == null ? $"v{Version} - {GitHash}" : $"v{Version} - {GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
 	}
 
 	public static VersionInfo Get()

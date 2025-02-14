@@ -46,7 +46,7 @@ public readonly record struct Sha2Value
 		return true;
 	}
 
-	public override readonly int GetHashCode() => HashCode.Combine(val[0], val[2], val[10], val[12], val[20], val[22], val[31]);
+	public override readonly int GetHashCode() => HashCode.Combine(val[0], val[2], val[3], val[10], val[12], val[20], val[22], val[31]);
 
 	/// <summary>
 	/// construct SHA2 value from a byte span

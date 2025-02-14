@@ -33,28 +33,28 @@ public class FileDataNameSizeComparer : IEqualityComparer<FileData>, IEqualityCo
 			return true;
 		}
 
+#pragma warning disable IDE0046 // Convert to conditional expression
 		if (x == null || y == null) {
 			return false;
 		}
+#pragma warning restore IDE0046 // Convert to conditional expression
 
-		if (x is FileData a && y is FileData b) {
-			return Equals(a, b);
-		}
-
-		throw new ArgumentException("Types dont match", nameof(x));
+		return x is FileData a && y is FileData b
+			? Equals(a, b)
+			: throw new ArgumentException("Types dont match", nameof(x));
 	}
 
 	public int GetHashCode(object obj)
 	{
+#pragma warning disable IDE0046 // Convert to conditional expression
 		if (obj == null) {
 			return 0;
 		}
+#pragma warning restore IDE0046 // Convert to conditional expression
 
-		if (obj is FileData x) {
-			return GetHashCode(x);
-		}
-
-		throw new ArgumentException("Incorrect type", nameof(obj));
+		return obj is FileData x
+			? GetHashCode(x)
+			: throw new ArgumentException("Incorrect type", nameof(obj));
 	}
 }
 
@@ -73,28 +73,28 @@ public class FileDataNameComparer : IEqualityComparer<FileData>, IEqualityCompar
 			return true;
 		}
 
+#pragma warning disable IDE0046 // Convert to conditional expression
 		if (x == null || y == null) {
 			return false;
 		}
+#pragma warning restore IDE0046 // Convert to conditional expression
 
-		if (x is FileData a && y is FileData b) {
-			return Equals(a, b);
-		}
-
-		throw new ArgumentException("Types dont match", nameof(x));
+		return x is FileData a && y is FileData b
+			? Equals(a, b)
+			: throw new ArgumentException("Types dont match", nameof(x));
 	}
 
 	public int GetHashCode(object obj)
 	{
+#pragma warning disable IDE0046 // Convert to conditional expression
 		if (obj == null) {
 			return 0;
 		}
+#pragma warning restore IDE0046 // Convert to conditional expression
 
-		if (obj is FileData x) {
-			return GetHashCode(x);
-		}
-
-		throw new ArgumentException("Incorrect type", nameof(obj));
+		return obj is FileData x
+			? GetHashCode(x)
+			: throw new ArgumentException("Incorrect type", nameof(obj));
 	}
 }
 
@@ -113,27 +113,27 @@ public class FileDataHashComparer : IEqualityComparer<FileData>, IEqualityCompar
 			return true;
 		}
 
+#pragma warning disable IDE0046 // Convert to conditional expression
 		if (x == null || y == null) {
 			return false;
 		}
+#pragma warning restore IDE0046 // Convert to conditional expression
 
-		if (x is FileData a && y is FileData b) {
-			return Equals(a, b);
-		}
-
-		throw new ArgumentException("Types dont match", nameof(x));
+		return x is FileData a && y is FileData b
+			? Equals(a, b)
+			: throw new ArgumentException("Types dont match", nameof(x));
 	}
 
 	public int GetHashCode(object obj)
 	{
+#pragma warning disable IDE0046 // Convert to conditional expression
 		if (obj == null) {
 			return 0;
 		}
+#pragma warning restore IDE0046 // Convert to conditional expression
 
-		if (obj is FileData x) {
-			return GetHashCode(x);
-		}
-
-		throw new ArgumentException("Incorrect type", nameof(obj));
+		return obj is FileData x
+			? GetHashCode(x)
+			: throw new ArgumentException("Incorrect type", nameof(obj));
 	}
 }
