@@ -1,5 +1,9 @@
 name: Building Rust app
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   push:
     branches: [ "main" ]
