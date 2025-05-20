@@ -9,22 +9,18 @@
   <PropertyGroup>
   	<Version>1.2.1.0</Version> 
 	<InformationalVersion>$(SourceRevisionId)</InformationalVersion> 
-
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Platforms>AnyCPU;x64</Platforms>
-
-    <PublishAot>true</PublishAot>
-
+	<OutputType>Exe</OutputType>
+	<TargetFramework>net9.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<Platforms>AnyCPU;x64</Platforms>
+	<PublishAot>true</PublishAot>
   </PropertyGroup>
   
   <PropertyGroup>
-    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-	
+	<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	<AnalysisModeDesign>All</AnalysisModeDesign>
-    <AnalysisModeSecurity>All</AnalysisModeSecurity>
+	<AnalysisModeSecurity>All</AnalysisModeSecurity>
 	<AnalysisModePerformance>All</AnalysisModePerformance>
 	<AnalysisModeReliability>All</AnalysisModeReliability>
 	<AnalysisModeUsage>All</AnalysisModeUsage>
@@ -36,7 +32,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.13.61">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
