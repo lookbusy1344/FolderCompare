@@ -20,11 +20,11 @@ Build the Rust version with `cargo build -r`
 ## Details
 The program walks the first folder tree (given by `-a`) and records all filenames, sizes and optionally hashes. It does the same with the second folder tree (given by `-b`). Files are compared (using `-c`) and differences listed. Comparison can be via:
 
-| Comparison | Description |
-| -- | -- |
-| --comparison Name       | Filename only (default, fast) |
-| --comparison NameSize   | Filename and file size (fast) |
-| --comparison Hash       | SHA2 hash, disregarding filenames (slow) |
+| Comparison            | Description                              |
+|-----------------------|------------------------------------------|
+| --comparison Name     | Filename only (default, fast)            |
+| --comparison NameSize | Filename and file size (fast)            |
+| --comparison Hash     | SHA2 hash, disregarding filenames (slow) |
 
 Comparison by name only checks the filename itself, not the path. Eg `a/b/file.txt` and `d/e/file.txt` will be considered the same file.
 
@@ -68,16 +68,16 @@ This does mean that `FileData<a>` isn't type compatible with `FileData<b>`, whic
 
 Benchmarks from Hyperfine, run on a wheezy old laptop. Code from ver 1.0.6 (8a7eb6c2b949615ec77). The C# version is compiled to a native binary, to improve startup speed. All times in milliseconds (lower is better). Test folders have 800-1200 file differences.
 
-| Benchmark      | Rust single-thread   | C# single-thread  | Difference  | Rust parallel | C# parallel | Difference |
-| ----------- | -----------   | -----------  | ----------- | -----------     | ----------- | --------- |          
-| Comparing by name | 61 | 65 |	x1.03 (dead-heat)	                    |	    49	|    70   |	x1.4 |
-| Second run		| 65 | 65 |		                                    |	    50	|    71   | |
-| Comparing by hash | 1808 | 1994 |	x1.1                                |      1253 |   1390  |	x1.12 |
-| Second run	    | 1801 | 1974 |                                     |	  1246  |   1410  | |
+| Benchmark         | Rust single-thread | C# single-thread | Difference          | Rust parallel | C# parallel | Difference |
+|-------------------|--------------------|------------------|---------------------|---------------|-------------|------------|          
+| Comparing by name | 61                 | 65               | 	x1.03 (dead-heat)	 | 	    49	      | 70          | 	x1.4      |
+| Second run		      | 65                 | 65               | 		                  | 	    50	      | 71          |            |
+| Comparing by hash | 1808               | 1994             | 	x1.1               | 1253          | 1390        | 	x1.12     |
+| Second run	       | 1801               | 1974             |                     | 	  1246       | 1410        |            |
 
 Hashing is obviously more expensive than comparison by filename. The parallel code is around 30% faster than single-threaded (a maximum of 2 threads are used, and only for the folder enumeration and hashing).
 
-The C# code performs suprisingly well, only 112% of Rust speed for the heavier workload of hashing. This is impressive given Rust's higher cognative load.
+The C# code performs surprisingly well, only 112% of Rust speed for the heavier workload of hashing. This is impressive given Rust's higher cognitive load.
 
 ## C# Publishing
 
