@@ -19,15 +19,15 @@ internal static class Program
 		var path2 = opts.FolderB!.FullName;
 
 		if (path1 == path2) {
-			throw new Exception("The two folders must be different");
+			throw new("The two folders must be different");
 		}
 
 		if (!opts.FolderA.Exists) {
-			throw new Exception($"Folder {path1} does not exist");
+			throw new($"Folder {path1} does not exist");
 		}
 
 		if (!opts.FolderB.Exists) {
-			throw new Exception($"Folder {path2} does not exist");
+			throw new($"Folder {path2} does not exist");
 		}
 
 		// we need two comparers because we enumerate both folders in parallel
@@ -64,11 +64,11 @@ internal static class Program
 		}
 
 		if (files1.Count == 0) {
-			throw new Exception($"No files found in {path1}");
+			throw new($"No files found in {path1}");
 		}
 
 		if (files2.Count == 0) {
-			throw new Exception($"No files found in {path2}");
+			throw new($"No files found in {path2}");
 		}
 
 		var c1 = CompareSets(files1, files2, path1, path2, comparer1, opts.Raw);
@@ -125,7 +125,7 @@ internal static class Program
 
 		pico.Finished();
 
-		return new Config(new DirectoryInfo(foldera), new DirectoryInfo(folderb), ParseType(comparisonStr), raw, oneThread, firstOnly);
+		return new(new(foldera), new(folderb), ParseType(comparisonStr), raw, oneThread, firstOnly);
 	}
 
 	private static ComparisonType ParseType(string? s)
@@ -138,7 +138,7 @@ internal static class Program
 
 		return Enum.TryParse(s, true, out ComparisonType result)
 			? result
-			: throw new Exception($"Invalid comparison type: {s}");
+			: throw new($"Invalid comparison type: {s}");
 	}
 
 	/// <summary>
@@ -148,13 +148,14 @@ internal static class Program
 		ComparisonType.NameSize => new FileDataNameSizeComparer(),
 		ComparisonType.Name => new FileDataNameComparer(),
 		ComparisonType.Hash => new FileDataHashComparer(),
-		_ => throw new NotImplementedException(),
+		_ => throw new NotImplementedException()
 	};
 
 	/// <summary>
 	/// Compare the two sets of files and display the differences
 	/// </summary>
-	private static int CompareSets(HashSet<FileData> a, HashSet<FileData> b, string path1, string path2, IEqualityComparer<FileData> comparer, bool raw)
+	private static int CompareSets(HashSet<FileData> a, HashSet<FileData> b, string path1, string path2,
+		IEqualityComparer<FileData> comparer, bool raw)
 	{
 		var difference = a
 			.Except(b, comparer)
@@ -165,10 +166,12 @@ internal static class Program
 			Console.WriteLine();
 			Console.WriteLine($"Files in \"{path1}\" but not in \"{path2}\":");
 		}
+
 		foreach (var file in difference) {
 			Console.WriteLine(file.Path);
 			++count;
 		}
+
 		if (count == 0 && !raw) {
 			Console.WriteLine("None");
 		}
@@ -179,13 +182,15 @@ internal static class Program
 	/// <summary>
 	/// Scan a folder recursively and return a set of FileData objects
 	/// </summary>
-	private static HashSet<FileData> ScanFolder(DirectoryInfo dir, bool flagduplicates, IEqualityComparer<FileData> comparer)
+	private static HashSet<FileData> ScanFolder(DirectoryInfo dir, bool flagduplicates,
+		IEqualityComparer<FileData> comparer)
 	{
 		var path = dir.FullName;
 		var usehash = comparer is FileDataHashComparer;
 		var usesize = usehash || comparer is FileDataNameSizeComparer;
 
-		var files = Directory.GetFiles(path, "*", new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true });
+		var files = Directory.GetFiles(path, "*",
+			new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true });
 		var fileset = new HashSet<FileData>(files.Length, comparer);
 
 		foreach (var file in files) {
@@ -193,7 +198,7 @@ internal static class Program
 				var name = Path.GetFileName(file);
 				var filePath = Path.GetFullPath(file);
 				var size = usesize ? new FileInfo(file).Length : 0;
-				var hash = (usehash && size > 0) ? HashBuilder.ComputeHashOfFile(file) : Sha2Value.Empty;
+				var hash = usehash && size > 0 ? HashBuilder.ComputeHashOfFile(file) : Sha2Value.Empty;
 
 				var data = new FileData(name, filePath, size, hash);
 				var added = fileset.Add(data);
@@ -210,18 +215,18 @@ internal static class Program
 	}
 
 	private const string CommandLineMessage = """
-		Usage: FolderCompare.exe --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
+	                                          Usage: FolderCompare.exe --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
 
-		Required:
-		  -a, --foldera <folder>    Folder A to compare
-		  -b, --folderb <folder>    Folder B to compare
+	                                          Required:
+	                                            -a, --foldera <folder>    Folder A to compare
+	                                            -b, --folderb <folder>    Folder B to compare
 
-		Options:
-		  -c, --comparison <type>    Comparison type: name, namesize, hash (default is name)
+	                                          Options:
+	                                            -c, --comparison <type>    Comparison type: name, namesize, hash (default is name)
 
-		  -h, --help                 Show this help
-		  -r, --raw                  Raw output, for piping
-		  -o, --one-thread           Use only one thread
-		  -f, --first-only           Only show files in A missing in B
-		""";
+	                                            -h, --help                 Show this help
+	                                            -r, --raw                  Raw output, for piping
+	                                            -o, --one-thread           Use only one thread
+	                                            -f, --first-only           Only show files in A missing in B
+	                                          """;
 }

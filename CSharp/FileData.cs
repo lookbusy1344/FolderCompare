@@ -5,12 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 public enum ComparisonType
 {
-	[Display(Name = "NameSize")]
-	NameSize,
-	[Display(Name = "Name")]
-	Name,
-	[Display(Name = "Hash")]
-	Hash
+	[Display(Name = "NameSize")] NameSize,
+	[Display(Name = "Name")] Name,
+	[Display(Name = "Hash")] Hash
 }
 
 /// <summary>

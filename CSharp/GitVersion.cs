@@ -43,19 +43,21 @@ public class VersionInfo
 
 		GitHash ??= string.Empty;
 
-		return len == null ? $"v{Version} - {GitHash}" : $"v{Version} - {GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
+		return len == null
+			? $"v{Version} - {GitHash}"
+			: $"v{Version} - {GitHash[..len.Value]}{(GitModified ? "+" : string.Empty)}";
 	}
 
 	public static VersionInfo Get()
 	{
 		var assembly = Assembly.GetExecutingAssembly();
 		if (assembly == null) {
-			return VersionInfo.Empty;
+			return Empty;
 		}
 
 		var verinfo = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
 		if (verinfo == null) {
-			return VersionInfo.Empty;
+			return Empty;
 		}
 
 		var items = verinfo.InformationalVersion.Split('+', 2);
@@ -63,6 +65,6 @@ public class VersionInfo
 		var hash = items.Length > 1 ? items[1] : string.Empty;
 		var modified = hash[^1] == '+';
 
-		return new VersionInfo { Version = version, GitHash = hash, GitModified = modified };
+		return new() { Version = version, GitHash = hash, GitModified = modified };
 	}
 }

@@ -11,7 +11,7 @@ public readonly record struct Sha2Value
 	/// </summary>
 	private const int SizeInBytes = 32;
 
-#pragma warning disable CA1815, IDE0051, IDE0044, RCS1169, RCS1213    // warnings related to inline arrays, nothing significant                                                             
+#pragma warning disable CA1815, IDE0051, IDE0044, RCS1169, RCS1213 // warnings related to inline arrays, nothing significant
 	/// <summary>
 	/// A struct containing an inline array of 32 bytes, large enough for a SHA2 hash
 	/// </summary>
@@ -46,7 +46,8 @@ public readonly record struct Sha2Value
 		return true;
 	}
 
-	public override readonly int GetHashCode() => HashCode.Combine(val[0], val[2], val[3], val[10], val[12], val[20], val[22], val[31]);
+	public override readonly int GetHashCode() =>
+		HashCode.Combine(val[0], val[2], val[3], val[10], val[12], val[20], val[22], val[31]);
 
 	/// <summary>
 	/// construct SHA2 value from a byte span

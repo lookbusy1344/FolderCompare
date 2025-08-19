@@ -63,8 +63,8 @@ public static class HashBuilder
 		Span<byte> hash = stackalloc byte[32];
 		using var stream = File.OpenRead(file);
 		return SHA256.HashData(stream, hash) != 32
-			? ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"))
-			: new Sha2Value(hash);
+			? ExHelper.AlwaysThrowNoReturn<Sha2Value>(new("Failed to compute hash"))
+			: new(hash);
 	}
 
 	/// <summary>
@@ -79,10 +79,11 @@ public static class HashBuilder
 		//while (stream.Read(MemoryMarshal.AsBytes(buffer)) is int bytesRead && bytesRead > 0)
 		while (stream.Read(buffer) is int bytesRead && bytesRead > 0) {
 			if (!SHA256.TryHashData(buffer, hash, out _)) {
-				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new("Failed to compute hash"));
 			}
 		}
-		return new Sha2Value(hash);
+
+		return new(hash);
 	}
 
 	/// <summary>
@@ -93,8 +94,8 @@ public static class HashBuilder
 	{
 		Span<byte> hash = stackalloc byte[32];
 		return !SHA256.TryHashData(Encoding.UTF8.GetBytes(text), hash, out _)
-			? ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"))
-			: new Sha2Value(hash);
+			? ExHelper.AlwaysThrowNoReturn<Sha2Value>(new("Failed to compute hash"))
+			: new(hash);
 	}
 
 	/// <summary>
@@ -110,14 +111,14 @@ public static class HashBuilder
 
 		Span<byte> buffer = stackalloc byte[byteCount];
 		if (Encoding.UTF8.GetBytes(text, buffer) != byteCount) {
-			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to convert string to bytes"));
+			return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new("Failed to convert string to bytes"));
 		}
 
 		// now hash the bytes, again without heap allocations
 		Span<byte> hash = stackalloc byte[32];
 		return !SHA256.TryHashData(buffer, hash, out _)
-			? ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"))
-			: new Sha2Value(hash);
+			? ExHelper.AlwaysThrowNoReturn<Sha2Value>(new("Failed to compute hash"))
+			: new(hash);
 	}
 
 	/// <summary>
@@ -155,14 +156,14 @@ public static class HashBuilder
 
 			// buffer range is 0..byteslastindex, so hash that
 			if (!SHA256.TryHashData(buffer[..byteslastindex], hash, out _)) {
-				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new Exception("Failed to compute hash"));
+				return ExHelper.AlwaysThrowNoReturn<Sha2Value>(new("Failed to compute hash"));
 			}
 
 			// move the offset forward
 			charoffset += charsToCopy;
 		}
 
-		return new Sha2Value(hash);
+		return new(hash);
 	}
 }
 
