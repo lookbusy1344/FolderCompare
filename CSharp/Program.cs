@@ -15,8 +15,8 @@ internal static class Program
 			Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
 		}
 
-		var path1 = opts.FolderA!.FullName;
-		var path2 = opts.FolderB!.FullName;
+		var path1 = opts.FolderA.FullName;
+		var path2 = opts.FolderB.FullName;
 
 		if (path1 == path2) {
 			throw new("The two folders must be different");
@@ -94,7 +94,7 @@ internal static class Program
 		if (e.ExceptionObject is Exception ex) {
 			Console.WriteLine($"ERROR: {ex.Message}");
 		} else {
-			Console.WriteLine($"ERROR value: {0}", e.ExceptionObject?.ToString() ?? "?");
+			Console.WriteLine("ERROR value: {0}", e.ExceptionObject?.ToString() ?? "?");
 		}
 
 		Console.WriteLine();

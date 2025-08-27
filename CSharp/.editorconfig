@@ -1,6 +1,6 @@
 # New config, for command-line and ASP.NET apps, and UI combined
 # This keeps open-braces on same line for code blocks
-# 19 Aug 2025
+# 26 Aug 2025
 
 # Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
@@ -17,6 +17,7 @@ trim_trailing_whitespace = true
 
 # New line preferences
 insert_final_newline = true
+charset = utf-8 # On Windows by default it includes a byte order marker, utf-8-bom
 
 #### .NET Coding Conventions ####
 
