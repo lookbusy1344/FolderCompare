@@ -1,14 +1,9 @@
 # New config, for command-line and ASP.NET apps, and UI combined
 # This keeps open-braces on same line for code blocks
-# 26 Aug 2025
+# 28 Aug 2025
 
 # Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
-
-# Razor specific stuff Jan 2024
-[*.{cshtml,razor}]
-charset = utf-8
-trim_trailing_whitespace = true
 
 # C# files and Razor pages
 [*.{cs,cshtml,razor}]
