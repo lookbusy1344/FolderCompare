@@ -1,4 +1,4 @@
-﻿namespace FolderCompare;
+namespace FolderCompare;
 
 /// <summary>
 /// Command line options structure
@@ -12,12 +12,12 @@ internal sealed record class Config(
 	bool FirstOnly)
 {
 	public bool Equals(Config? other) => other != null
-	                                     && FolderA?.FullName == other.FolderA?.FullName
-	                                     && FolderB?.FullName == other.FolderB?.FullName
-	                                     && Compare == other.Compare
-	                                     && OneThread == other.OneThread
-	                                     && Raw == other.Raw
-	                                     && FirstOnly == other.FirstOnly;
+										 && FolderA?.FullName == other.FolderA?.FullName
+										 && FolderB?.FullName == other.FolderB?.FullName
+										 && Compare == other.Compare
+										 && OneThread == other.OneThread
+										 && Raw == other.Raw
+										 && FirstOnly == other.FirstOnly;
 
 	public override int GetHashCode() =>
 		HashCode.Combine(FolderA?.FullName, FolderB?.FullName, Compare, OneThread, Raw, FirstOnly);

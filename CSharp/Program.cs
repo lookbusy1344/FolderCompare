@@ -1,4 +1,4 @@
-﻿namespace FolderCompare;
+namespace FolderCompare;
 
 using PicoArgs_dotnet;
 

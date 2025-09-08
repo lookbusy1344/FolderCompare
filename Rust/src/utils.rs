@@ -6,7 +6,7 @@ use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 
 use crate::filedata::{FileDataCompareOption, Sha2Hash};
-use crate::{parse_comparer, FilePath};
+use crate::{FilePath, parse_comparer};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=+"]);

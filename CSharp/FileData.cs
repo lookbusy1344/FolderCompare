@@ -1,4 +1,4 @@
-﻿namespace FolderCompare;
+namespace FolderCompare;
 
 using System.Collections;
 using System.ComponentModel.DataAnnotations;

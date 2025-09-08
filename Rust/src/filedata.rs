@@ -24,7 +24,7 @@ impl Sha2Hash {
     /// Create a new `Sha2Hash` from a u8 slice
     pub fn new(slice: &[u8]) -> Self {
         let mut hash = [0u8; 32];
-        hash.copy_from_slice(slice);    // this automatically checks the length of slice is correct
+        hash.copy_from_slice(slice); // this automatically checks the length of slice is correct
         Sha2Hash { hash }
     }
 

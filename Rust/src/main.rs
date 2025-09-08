@@ -94,7 +94,12 @@ fn scan_and_check(config: &Config) -> anyhow::Result<()> {
 }
 
 /// Show the results of the comparison
-fn show_results(differences: &Vec<&FilePath>, present_in_dir: &Path, absent_in_dir: &Path, raw: bool) {
+fn show_results(
+    differences: &Vec<&FilePath>,
+    present_in_dir: &Path,
+    absent_in_dir: &Path,
+    raw: bool,
+) {
     if !raw {
         println!(
             "Files in '{}' but not in '{}'",
@@ -136,10 +141,7 @@ fn scan_folder(config: &Config, dir: &Path) -> anyhow::Result<HashMap<Sha2Hash, 
             };
 
             // insert the file into the hashset, with required key
-            fileset.insert(
-                key,
-                file_path.into(),
-            );
+            fileset.insert(key, file_path.into());
         }
     }
 

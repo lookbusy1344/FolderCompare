@@ -30,11 +30,15 @@ cd CSharp
 dotnet build
 dotnet run -- -a <foldera> -b <folderb> -c <comparison>
 
-# Release build with NativeAOT
+# Release build with NativeAOT (for performance comparison)
+# Note: NativeAOT is enabled via <PublishAot>true</PublishAot> in project file
 dotnet publish FolderCompare.csproj -r win-x64 -c Release
 
 # Quick publish (uses Publish.cmd)
 ./Publish.cmd
+
+# Format code (ALWAYS run after making changes)
+dotnet format FolderCompare.sln
 
 # Check vulnerabilities
 ./CheckVul.cmd
@@ -47,7 +51,7 @@ cd Rust
 cargo build
 cargo run -- -a <foldera> -b <folderb> -c <comparison>
 
-# Optimized release build
+# Optimized release build (for performance comparison)
 cargo build -r
 
 # Format code (ALWAYS run after making changes)

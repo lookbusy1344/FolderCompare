@@ -1,4 +1,4 @@
-﻿namespace FolderCompare;
+namespace FolderCompare;
 
 /// <summary>
 /// A struct record holding the SHA-2 hash of a file. This is a value type for speed
