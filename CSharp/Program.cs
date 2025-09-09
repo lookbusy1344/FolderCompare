@@ -215,18 +215,18 @@ internal static class Program
 	}
 
 	private const string CommandLineMessage = """
-	                                          Usage: FolderCompare.exe --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
+											  Usage: FolderCompare.exe --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
 
-	                                          Required:
-	                                            -a, --foldera <folder>    Folder A to compare
-	                                            -b, --folderb <folder>    Folder B to compare
+											  Required:
+											    -a, --foldera <folder>    Folder A to compare
+											    -b, --folderb <folder>    Folder B to compare
 
-	                                          Options:
-	                                            -c, --comparison <type>    Comparison type: name, namesize, hash (default is name)
+											  Options:
+											    -c, --comparison <type>    Comparison type: name, namesize, hash (default is name)
 
-	                                            -h, --help                 Show this help
-	                                            -r, --raw                  Raw output, for piping
-	                                            -o, --one-thread           Use only one thread
-	                                            -f, --first-only           Only show files in A missing in B
-	                                          """;
+											    -h, --help                 Show this help
+											    -r, --raw                  Raw output, for piping
+											    -o, --one-thread           Use only one thread
+											    -f, --first-only           Only show files in A missing in B
+											  """;
 }

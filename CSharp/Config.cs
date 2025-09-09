@@ -19,6 +19,5 @@ internal sealed record class Config(
 										 && Raw == other.Raw
 										 && FirstOnly == other.FirstOnly;
 
-	public override int GetHashCode() =>
-		HashCode.Combine(FolderA?.FullName, FolderB?.FullName, Compare, OneThread, Raw, FirstOnly);
+	public override int GetHashCode() => HashCode.Combine(FolderA?.FullName, FolderB?.FullName, Compare, OneThread, Raw, FirstOnly);
 }
