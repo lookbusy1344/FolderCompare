@@ -34,6 +34,9 @@ dotnet run -- -a <foldera> -b <folderb> -c <comparison>
 # Note: NativeAOT is enabled via <PublishAot>true</PublishAot> in project file
 dotnet publish FolderCompare.csproj -r win-x64 -c Release
 
+# Or on MacOS
+dotnet publish FolderCompare.csproj -r osx-x64 -c Release
+
 # Quick publish (uses Publish.cmd)
 ./Publish.cmd
 
