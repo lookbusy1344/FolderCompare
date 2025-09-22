@@ -1,5 +1,4 @@
 .DS_Store
 *.bak
 copilotDiffState.xml
-copilot.data.migration.agent.xml
-copilot.data.migration.edit.xml
+copilot.data.*.xml
