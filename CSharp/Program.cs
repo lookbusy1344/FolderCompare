@@ -215,7 +215,7 @@ internal static class Program
 	}
 
 	private const string CommandLineMessage = """
-											  Usage: FolderCompare.exe --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
+											  Usage: FolderCompare --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
 
 											  Required:
 											    -a, --foldera <folder>    Folder A to compare

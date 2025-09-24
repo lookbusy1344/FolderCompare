@@ -6,7 +6,7 @@ use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 
 use crate::filedata::{FileDataCompareOption, Sha2Hash};
-use crate::{FilePath, parse_comparer};
+use crate::{parse_comparer, FilePath};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=+"]);
@@ -14,7 +14,7 @@ const FILE_BUFFER_SIZE: usize = 4096;
 
 pub const HELP: &str = "\
 USAGE:
-    folder_compare.exe -a <folder> -b <folder> [-c <comparison>] [-r] [-f]
+    folder_compare -a <folder> -b <folder> [-c <comparison>] [-r] [-f]
 
 MANDATORY PARAMETERS:
     -a, --foldera                First folder to compare
