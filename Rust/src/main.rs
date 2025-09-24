@@ -111,7 +111,7 @@ fn show_results(
         }
     }
     for f in differences {
-        println!("{}", f);
+        println!("{f}");
     }
     if !raw {
         println!();

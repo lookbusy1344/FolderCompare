@@ -4,7 +4,7 @@ use strum::EnumString;
 
 /// convert comparison string into an instance of `FileDataCompareOption`
 pub fn parse_comparer(
-    comparer_str: &Option<String>,
+    comparer_str: Option<&String>,
 ) -> Result<FileDataCompareOption, strum::ParseError> {
     match comparer_str {
         Some(s) if !s.is_empty() => FileDataCompareOption::from_str(s), // a non-empty string
@@ -37,7 +37,7 @@ impl Sha2Hash {
 impl Display for Sha2Hash {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for byte in self.hash {
-            write!(f, "{:02x}", byte)?;
+            write!(f, "{byte:02x}")?;
         }
         Ok(())
     }

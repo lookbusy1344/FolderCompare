@@ -59,6 +59,9 @@ cargo build -r
 
 # Format code (ALWAYS run after making changes)
 cargo fmt
+
+# Lint code with strict settings
+cargo clippy -- -D clippy::all -D clippy::pedantic
 ```
 
 ### Testing

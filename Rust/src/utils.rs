@@ -6,7 +6,7 @@ use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 
 use crate::filedata::{FileDataCompareOption, Sha2Hash};
-use crate::{parse_comparer, FilePath};
+use crate::{FilePath, parse_comparer};
 
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 pub const GIT_VERSION: &str = git_version!(args = ["--abbrev=40", "--always", "--dirty=+"]);
@@ -101,7 +101,7 @@ pub fn parse_args() -> anyhow::Result<Config> {
     let path1: String = pargs.value_from_str(["-a", "--foldera"])?;
     let path2: String = pargs.value_from_str(["-b", "--folderb"])?;
     let comparer_str: Option<String> = pargs.opt_value_from_str(["-c", "--comparison"])?;
-    let comparer_res = parse_comparer(&comparer_str);
+    let comparer_res = parse_comparer(comparer_str.as_ref());
 
     // additional validation
 
@@ -125,7 +125,7 @@ pub fn parse_args() -> anyhow::Result<Config> {
     // Check for unused arguments, and error out if there are any
     let unused = pargs.finish();
     if !unused.is_empty() {
-        return Err(anyhow::anyhow!("Unused arguments: {:?}", unused));
+        return Err(anyhow::anyhow!("Unused arguments: {unused:?}"));
     }
 
     Ok(config)
