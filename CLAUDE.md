@@ -83,3 +83,6 @@ Both test scripts expect the respective binaries (`foldercompare.exe` for C#, `f
 - Keep code changes minimal and focused
 - Brief commit messages with single sentence summaries
 - Use most modern language idioms for both C# and Rust
+
+**Security:**
+- In the Rust project run `cargo audit` once a day when working on this project to check for security vulnerabilities in dependencies
