@@ -3,7 +3,7 @@ namespace PicoArgs_dotnet;
 /*  PICOARGS_DOTNET - a tiny command line argument parser for .NET
 	https://github.com/lookbusy1344/PicoArgs-dotnet
 
-	Version 3.4.1 - 25 Sep 2025
+	Version 3.5.0 - 31 Dec 2025
 
 	Example usage:
 
@@ -57,7 +57,7 @@ public class PicoArgs(IEnumerable<string> args, bool recogniseEquals = true)
 			// if this argument has a value, throw
 			if (argList[index].Value != null) {
 				throw new PicoArgsException(ErrorCode.UnexpectedValue,
-					$"Unexpected value for \"{string.Join(", ", options!)}\"");
+					$"Unexpected value for \"{string.Join(", ", options)}\"");
 			}
 
 			// found switch so consume it and return
@@ -97,7 +97,7 @@ public class PicoArgs(IEnumerable<string> args, bool recogniseEquals = true)
 	/// </summary>
 	public string GetParam(params ReadOnlySpan<string> options)
 		=> GetParamOpt(options) ?? throw new PicoArgsException(ErrorCode.MissingRequiredParameter,
-			$"Expected value for \"{string.Join(", ", options!)}\"");
+			$"Expected value for \"{string.Join(", ", options)}\"");
 
 	/// <summary>
 	/// Get a string value from the command line, or null if not present
@@ -197,6 +197,11 @@ public class PicoArgs(IEnumerable<string> args, bool recogniseEquals = true)
 	/// Return true if there are no unused command line parameters
 	/// </summary>
 	public bool IsEmpty => argList.Count == 0;
+
+	/// <summary>
+	/// Return true if Finished() has been called
+	/// </summary>
+	protected bool IsFinished => finished;
 
 	/// <summary>
 	/// Throw an exception if there are any unused command line parameters
@@ -332,7 +337,7 @@ public sealed class PicoArgsDisposable(IEnumerable<string> args, bool recogniseE
 	/// </summary>
 	public void Dispose()
 	{
-		if (!SuppressCheck) {
+		if (!SuppressCheck && !IsFinished) {
 			Finished();
 		}
 	}
