@@ -60,8 +60,8 @@ cargo build -r
 # Format code (ALWAYS run after making changes)
 cargo fmt
 
-# Lint code with strict settings
-cargo clippy -- -D clippy::all -D clippy::pedantic
+# Lint code with strict settings (unsafe_code is also forbidden via #![forbid(unsafe_code)] in main.rs)
+cargo clippy -- -D clippy::all -D clippy::pedantic -F unsafe_code
 ```
 
 ### Testing
