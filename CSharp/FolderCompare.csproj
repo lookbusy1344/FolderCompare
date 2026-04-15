@@ -32,7 +32,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="10.0.2" />
+        <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="10.0.6" />
         <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
