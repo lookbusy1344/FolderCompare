@@ -84,5 +84,7 @@ Both test scripts expect the respective binaries (`foldercompare.exe` for C#, `f
 - Brief commit messages with single sentence summaries
 - Use most modern language idioms for both C# and Rust
 
+- **IMPORTANT** Every `dotnet` Bash call must set `dangerouslyDisableSandbox: true` (build, test, format, run, restore, publish, and any `gtimeout`-wrapped variants). The Claude Code sandbox blocks `dotnet` even when listed in `excludedCommands`: MSBuild's Unix-domain sockets for diagnostic IPC and worker-node communication fail under `network-inbound` deny, and the EPERM surfaces as a silent generic build failure.
+
 **Security:**
 - In the Rust project run `cargo audit` once a day when working on this project to check for security vulnerabilities in dependencies
