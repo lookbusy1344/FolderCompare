@@ -8,7 +8,7 @@ using System.Text;
 internal static class HashUtils
 {
 	/// <summary>
-	/// Wrapper around TryWriteBytes that throws an exception if it fails, for uint
+	///     Wrapper around TryWriteBytes that throws an exception if it fails, for uint
 	/// </summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void WriteBytes(Span<byte> destination, uint value)
@@ -19,7 +19,7 @@ internal static class HashUtils
 	}
 
 	/// <summary>
-	/// Wrapper around TryWriteBytes that throws an exception if it fails, for ulong
+	///     Wrapper around TryWriteBytes that throws an exception if it fails, for ulong
 	/// </summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void WriteBytes(Span<byte> destination, ulong value)
@@ -30,7 +30,7 @@ internal static class HashUtils
 	}
 
 	/// <summary>
-	/// Turn this span into a hex string, without heap allocations (except for the final string)
+	///     Turn this span into a hex string, without heap allocations (except for the final string)
 	/// </summary>
 	public static string ToHexString(ReadOnlySpan<byte> sourcebytes)
 	{
@@ -51,12 +51,12 @@ internal static class HashUtils
 }
 
 /// <summary>
-/// Functions for computing hashes based on files and strings
+///     Functions for computing hashes based on files and strings
 /// </summary>
 public static class HashBuilder
 {
 	/// <summary>
-	/// Compute the SHA256 hash of a file. This uses heap allocation
+	///     Compute the SHA256 hash of a file. This uses heap allocation
 	/// </summary>
 	public static Sha2Value ComputeHashOfFile(string file)
 	{
@@ -68,7 +68,7 @@ public static class HashBuilder
 	}
 
 	/// <summary>
-	/// Compute the SHA256 hash of a file, without heap allocations
+	///     Compute the SHA256 hash of a file, without heap allocations
 	/// </summary>
 	public static Sha2Value ComputeHashOfFileNoAlloc(string file)
 	{
@@ -87,8 +87,8 @@ public static class HashBuilder
 	}
 
 	/// <summary>
-	/// Compute the SHA256 hash of a string.
-	/// Converting string to bytes is a heap allocation
+	///     Compute the SHA256 hash of a string.
+	///     Converting string to bytes is a heap allocation
 	/// </summary>
 	public static Sha2Value ComputeHashOfString(string text)
 	{
@@ -99,7 +99,7 @@ public static class HashBuilder
 	}
 
 	/// <summary>
-	/// Compute the SHA256 hash of a string, without heap allocations
+	///     Compute the SHA256 hash of a string, without heap allocations
 	/// </summary>
 	public static Sha2Value ComputeHashOfStringNoAlloc(string text)
 	{
@@ -122,8 +122,8 @@ public static class HashBuilder
 	}
 
 	/// <summary>
-	/// Compute the SHA256 hash of a string, by processing the string in chunks without heap allocations
-	/// This uses a smaller buffer than ComputeHashOfStringNoAlloc
+	///     Compute the SHA256 hash of a string, by processing the string in chunks without heap allocations
+	///     This uses a smaller buffer than ComputeHashOfStringNoAlloc
 	/// </summary>
 	public static Sha2Value ComputeHashOfStringNoAlloc2(string text)
 	{
@@ -168,20 +168,20 @@ public static class HashBuilder
 }
 
 /// <summary>
-/// Two chars, representing a single byte in hex
+///     Two chars, representing a single byte in hex
 /// </summary>
 public readonly record struct HexByte(char HighChar, char LowChar)
 {
 	/// <summary>
-	/// Used to lookup nibbles in ByteToHex - 0='0' and 15='f'
-	/// See Framework Design Guidelines, 3rd Edition, sec 9.12 page 438
+	///     Used to lookup nibbles in ByteToHex - 0='0' and 15='f'
+	///     See Framework Design Guidelines, 3rd Edition, sec 9.12 page 438
 	/// </summary>
 	private static ReadOnlySpan<char> CharLookup => "0123456789abcdef".ToCharArray();
 
 	public override string ToString() => $"{HighChar}{LowChar}";
 
 	/// <summary>
-	/// Turn a byte into hex representation, without heap allocations
+	///     Turn a byte into hex representation, without heap allocations
 	/// </summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static HexByte FromByte(byte b) => new(CharLookup[b >> 4], CharLookup[b & 0x0F]); // high nibble, low nibble
@@ -190,14 +190,15 @@ public readonly record struct HexByte(char HighChar, char LowChar)
 internal static class ExHelper
 {
 	/// <summary>
-	/// Framework design guidelines
-	/// Page 259 - Members that throw exceptions are less likely to be inlined. Moving the throw statement inside the builder might allow the member to be inlined.
+	///     Framework design guidelines
+	///     Page 259 - Members that throw exceptions are less likely to be inlined. Moving the throw statement inside the builder might allow the member to
+	///     be inlined.
 	/// </summary>
 	[DoesNotReturn]
 	internal static void AlwaysThrow(Exception ex) => throw ex;
 
 	/// <summary>
-	/// Throw provided exception, with a dummy return
+	///     Throw provided exception, with a dummy return
 	/// </summary>
 	[DoesNotReturn]
 	internal static T AlwaysThrowNoReturn<T>(Exception ex) => throw ex;

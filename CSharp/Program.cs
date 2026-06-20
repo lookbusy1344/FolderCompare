@@ -1,9 +1,26 @@
 namespace FolderCompare;
 
+using GitVersion;
 using PicoArgs_dotnet;
 
 internal static class Program
 {
+	private const string CommandLineMessage = """
+											  Usage: FolderCompare --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
+
+											  Required:
+											    -a, --foldera <folder>    Folder A to compare
+											    -b, --folderb <folder>    Folder B to compare
+
+											  Options:
+											    -c, --comparison <type>    Comparison type: name, namesize, hash (default is name)
+
+											    -h, --help                 Show this help
+											    -r, --raw                  Raw output, for piping
+											    -o, --one-thread           Use only one thread
+											    -f, --first-only           Only show files in A missing in B
+											  """;
+
 	public static async Task<int> Main(string[] args)
 	{
 		AppDomain.CurrentDomain.UnhandledException += App_UnhandledException;
@@ -11,7 +28,7 @@ internal static class Program
 		var opts = ParseCommandLine(args);
 
 		if (!opts.Raw) {
-			var info = GitVersion.VersionInfo.Get();
+			var info = VersionInfo.Get();
 			Console.WriteLine($"FolderCompare {info.GetVersionHash(20)}");
 		}
 
@@ -86,7 +103,7 @@ internal static class Program
 	}
 
 	/// <summary>
-	/// Global exception handler (for unhandled exceptions)
+	///     Global exception handler (for unhandled exceptions)
 	/// </summary>
 	private static void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 	{
@@ -103,7 +120,7 @@ internal static class Program
 	}
 
 	/// <summary>
-	/// Parse the command line info
+	///     Parse the command line info
 	/// </summary>
 	private static Config ParseCommandLine(string[] args)
 	{
@@ -142,17 +159,17 @@ internal static class Program
 	}
 
 	/// <summary>
-	/// Build the required comparer
+	///     Build the required comparer
 	/// </summary>
 	private static IEqualityComparer<FileData> BuildComparer(ComparisonType t) => t switch {
 		ComparisonType.NameSize => new FileDataNameSizeComparer(),
 		ComparisonType.Name => new FileDataNameComparer(),
 		ComparisonType.Hash => new FileDataHashComparer(),
-		_ => throw new NotImplementedException()
+		_ => throw new NotImplementedException(),
 	};
 
 	/// <summary>
-	/// Compare the two sets of files and display the differences
+	///     Compare the two sets of files and display the differences
 	/// </summary>
 	private static int CompareSets(HashSet<FileData> a, HashSet<FileData> b, string path1, string path2,
 		IEqualityComparer<FileData> comparer, bool raw)
@@ -180,7 +197,7 @@ internal static class Program
 	}
 
 	/// <summary>
-	/// Scan a folder recursively and return a set of FileData objects
+	///     Scan a folder recursively and return a set of FileData objects
 	/// </summary>
 	private static HashSet<FileData> ScanFolder(DirectoryInfo dir, bool flagduplicates,
 		IEqualityComparer<FileData> comparer)
@@ -213,20 +230,4 @@ internal static class Program
 
 		return fileset;
 	}
-
-	private const string CommandLineMessage = """
-											  Usage: FolderCompare --foldera c:\1 --folderb c:\2 [--comparison hash] [--one-thread] [--first-only] [--raw]
-
-											  Required:
-											    -a, --foldera <folder>    Folder A to compare
-											    -b, --folderb <folder>    Folder B to compare
-
-											  Options:
-											    -c, --comparison <type>    Comparison type: name, namesize, hash (default is name)
-
-											    -h, --help                 Show this help
-											    -r, --raw                  Raw output, for piping
-											    -o, --one-thread           Use only one thread
-											    -f, --first-only           Only show files in A missing in B
-											  """;
 }

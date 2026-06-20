@@ -1,28 +1,28 @@
-using System.Reflection;
-
 namespace GitVersion;
+
+using System.Reflection;
 
 public class VersionInfo
 {
 	/// <summary>
-	/// Version string eg "1.0.0.0"
+	///     An empty version info
+	/// </summary>
+	public static readonly VersionInfo Empty = new() { Version = string.Empty, GitHash = string.Empty };
+
+	/// <summary>
+	///     Version string eg "1.0.0.0"
 	/// </summary>
 	public string? Version { get; init; }
 
 	/// <summary>
-	/// Git hash eg "a1b2c3d4e5f6"
+	///     Git hash eg "a1b2c3d4e5f6"
 	/// </summary>
 	public string? GitHash { get; private set; }
 
 	/// <summary>
-	/// Git modified flag
+	///     Git modified flag
 	/// </summary>
 	public bool GitModified { get; private set; }
-
-	/// <summary>
-	/// An empty version info
-	/// </summary>
-	public static readonly VersionInfo Empty = new() { Version = string.Empty, GitHash = string.Empty };
 
 	public string GetHash(int? len = null)
 	{

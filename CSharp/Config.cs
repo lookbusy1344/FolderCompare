@@ -1,7 +1,7 @@
 namespace FolderCompare;
 
 /// <summary>
-/// Command line options structure
+///     Command line options structure
 /// </summary>
 internal sealed record class Config(
 	DirectoryInfo FolderA,
